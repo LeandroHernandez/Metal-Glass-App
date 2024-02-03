@@ -12,6 +12,8 @@ import {
 import { Observable } from 'rxjs';
 import { IDataForm } from '../../../../../../interfaces/form-data.interface';
 import { RoutesApp } from '../../../../../constants';
+import { QuotesService } from '../../quotes.service';
+import { localStorageLabels } from '../../../../../constants/localStorageLabels';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +22,7 @@ export class FormGuard implements CanActivate, CanLoad {
   private _condition: boolean = false;
   private _accesToken: IDataForm | null = null;
 
-  constructor(private _router: Router) {}
+  constructor(private _router: Router, private _quotesSvc: QuotesService) {}
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
@@ -30,7 +32,9 @@ export class FormGuard implements CanActivate, CanLoad {
     | boolean
     | UrlTree {
     this._condition = false;
-    const dataForm = localStorage.getItem('dataForm');
+    const dataForm = this._quotesSvc._storageSvc.get(
+      localStorageLabels.dataForm
+    );
     if (dataForm) {
       const dataFormParse: IDataForm = JSON.parse(dataForm);
       if (dataFormParse) {
@@ -60,7 +64,9 @@ export class FormGuard implements CanActivate, CanLoad {
     | boolean
     | UrlTree {
     this._condition = false;
-    const dataForm = localStorage.getItem('dataForm');
+    const dataForm = this._quotesSvc._storageSvc.get(
+      localStorageLabels.dataForm
+    );
     if (dataForm) {
       const dataFormParse: IDataForm = JSON.parse(dataForm);
       if (dataFormParse) {

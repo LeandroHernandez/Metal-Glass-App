@@ -18,12 +18,13 @@
       <form
         nz-form
         [formGroup]="registerAssignmentForm"
-        (ngSubmit)="
+        (ngSubmit)="assignment && assignment.id ? registerAssignment() : false"
+      >
+        <!-- (ngSubmit)="
           assignment && assignment.id
             ? editAssignment(assignment.id)
             : registerAssignment()
-        "
-      >
+        " -->
         <div
           nz-row
           nzAlign="top"

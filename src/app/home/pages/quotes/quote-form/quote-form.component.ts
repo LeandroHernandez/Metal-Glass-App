@@ -32,6 +32,7 @@ import { NzCollapseModule } from 'ng-zorro-antd/collapse';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { localStorageLabels } from '../../../../constants/localStorageLabels';
 
 @Component({
   selector: 'app-quote-form',
@@ -151,7 +152,7 @@ DE SERNA MARTINEZ ROBERT`,
   constructor(
     private _fb: FormBuilder,
     private _modalService: NzModalService,
-    private _quotesService: QuotesService
+    private _quotesSvc: QuotesService
   ) {}
 
   ngOnInit(): void {
@@ -160,45 +161,40 @@ DE SERNA MARTINEZ ROBERT`,
     this.formQuoteGeneralArray.clear();
   }
 
-  getInputProperties(): void {
-    // this.quote = JSON.parse(localStorage.getItem('quote') ?? '');
-    // this.editActionCondition = JSON.parse(
-    //   localStorage.getItem('editActionCondition') ?? ''
-    // );
-  }
+  getInputProperties(): void {}
 
   getAparts(): void {
-    this._quotesService.getAccessories().subscribe(
+    this._quotesSvc.getAccessories().subscribe(
       (accessories) => {
         this.accessories = accessories;
       },
       (error) => console.log({ error })
     );
-    this._quotesService.getProfiles().subscribe(
+    this._quotesSvc.getProfiles().subscribe(
       (profiles) => {
         this.profiles = profiles;
       },
       (error) => console.log({ error })
     );
-    this._quotesService.getGlasses().subscribe(
+    this._quotesSvc.getGlasses().subscribe(
       (glasses) => {
         this.glasses = glasses;
       },
       (error) => console.log({ error })
     );
-    this._quotesService.getAcrylics().subscribe(
+    this._quotesSvc.getAcrylics().subscribe(
       (acrylics) => {
         this.acrylics = acrylics;
       },
       (error) => console.log({ error })
     );
-    this._quotesService.getAditionalReferences().subscribe(
+    this._quotesSvc.getAditionalReferences().subscribe(
       (AditionalReferences) => {
         this.AditionalReferences = AditionalReferences;
       },
       (error) => console.log({ error })
     );
-    this._quotesService.getClients().subscribe(
+    this._quotesSvc.getClients().subscribe(
       (clients) => {
         this.clients = clients;
       },
@@ -275,28 +271,29 @@ DE SERNA MARTINEZ ROBERT`,
       // nzContent: RegisterQuoteResumenComponent,
       nzContent: QuoteSummaryViewComponent,
       nzWidth: '90%',
-      // nzComponentParams: {
-      //   quote: this.quote,
-      //   formQuoteGeneral,
-      //   productsPerQuote,
-      //   typesOfProductsToQuote,
-      //   registrationActionCondition,
-      //   editActionCondition: this.editActionCondition,
-      // },
     });
-    localStorage.setItem('quote', JSON.stringify(this.quote));
-    localStorage.setItem('formQuoteGeneral', JSON.stringify(formQuoteGeneral));
-    localStorage.setItem('productsPerQuote', JSON.stringify(productsPerQuote));
-    localStorage.setItem(
-      'typesOfProductsToQuote',
+    this._quotesSvc._storageSvc.set(
+      localStorageLabels.quote,
+      JSON.stringify(this.quote)
+    );
+    this._quotesSvc._storageSvc.set(
+      localStorageLabels.formQuoteGeneral,
+      JSON.stringify(formQuoteGeneral)
+    );
+    this._quotesSvc._storageSvc.set(
+      localStorageLabels.productsPerQuote,
+      JSON.stringify(productsPerQuote)
+    );
+    this._quotesSvc._storageSvc.set(
+      localStorageLabels.typesOfProductsToQuote,
       JSON.stringify(typesOfProductsToQuote)
     );
-    localStorage.setItem(
-      'registrationActionCondition',
+    this._quotesSvc._storageSvc.set(
+      localStorageLabels.registrationActionCondition,
       JSON.stringify(registrationActionCondition)
     );
-    localStorage.setItem(
-      'editActionCondition',
+    this._quotesSvc._storageSvc.set(
+      localStorageLabels.editActionCondition,
       JSON.stringify(this.editActionCondition)
     );
     quoteSummaryViewComponent.componentInstance?.registedEmitter.subscribe(
@@ -338,6 +335,6 @@ DE SERNA MARTINEZ ROBERT`,
   }
 
   ngOnDestroy(): void {
-    localStorage.removeItem('quote');
+    this._quotesSvc._storageSvc.remove(localStorageLabels.quote);
   }
 }

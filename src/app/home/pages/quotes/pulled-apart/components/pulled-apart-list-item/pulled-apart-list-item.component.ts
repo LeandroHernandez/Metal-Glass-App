@@ -15,6 +15,7 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { localStorageLabels } from '../../../../../../constants/localStorageLabels';
 
 @Component({
   selector: 'app-pulled-apart-list-item',
@@ -132,7 +133,10 @@ export class PulledApartListItemComponent implements OnInit {
         nzOnOk: () => this.getpulledApart(),
         nzOnCancel: () => this.getpulledApart(),
       });
-      localStorage.setItem('dataForm', JSON.stringify(dataForm));
+      this._quotesSvc._storageSvc.set(
+        localStorageLabels.dataForm,
+        JSON.stringify(dataForm)
+      );
     }
   }
 

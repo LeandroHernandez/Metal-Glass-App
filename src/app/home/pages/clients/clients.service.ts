@@ -22,6 +22,7 @@ import {
 import { DbCollections } from '../../../constants/db-collections';
 import { Observable } from 'rxjs';
 import { IClient } from '../../../../interfaces/client.interface';
+import { BrowserStorageService } from '../../../browser-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -34,7 +35,10 @@ export class ClientsService {
 
   private _db = getFirestore();
 
-  constructor(private _fireStore: Firestore) {}
+  constructor(
+    private _fireStore: Firestore,
+    public _storageSvc: BrowserStorageService
+  ) {}
 
   registerClient(
     clientDTO: any
@@ -61,13 +65,48 @@ export class ClientsService {
   }
 
   // async filter(names: string): Promise<void> {
-  filter(names: string): any {
+  // filter(names: string): any {
+  filter(key: string, value: string[]): any {
     // return this.clientsCollection.ref
     //   .orderBy('names')
     //   .startAt(names)
     //   .endAt(names + '\uf8ff');
 
     const clientsCollectionRef = collection(this._db, DbCollections.clients);
+    const clients: Array<IClient | DocumentData> = [];
+    switch (key) {
+      case 'documentType':
+        value.forEach(async (documentType) => {
+          const q = query(
+            clientsCollectionRef,
+            where('documentType', '==', documentType)
+          );
+          const clientsResult = await getDocs(q);
+          clientsResult.forEach((client) => {
+            clients.push(client.data());
+          });
+        });
+        break;
+      case 'names':
+        value.forEach(async (name) => {
+          const q = query(clientsCollectionRef, where('names', '==', name));
+          const clientsResult = await getDocs(q);
+          clientsResult.forEach((client) => {
+            clients.push(client.data());
+          });
+        });
+    }
+    return clients;
+    // const namesList: Array<string> = ['Johan Leandro', 'Jesus Antonio'];
+    // namesList.forEach(async (name) => {
+    //   const q = query(clientsCollectionRef, where('names', '==', name));
+    //   const clientsResult = await getDocs(q);
+    //   clientsResult.forEach((client) => {
+    //     clients.push(client.data());
+    //   });
+    // });
+    // return clients;
+
     // const q = query(
     //   clientsCollectionRef,
     //   orderBy('names'),
@@ -86,15 +125,15 @@ export class ClientsService {
     // clientsResult.forEach((client) => {
     // });
 
-    const clients: Array<IClient | DocumentData> = [];
-    const namesList: Array<string> = ['Johan Leandro', 'Jesus Antonio'];
-    namesList.forEach(async (name) => {
-      const q = query(clientsCollectionRef, where('names', '==', name));
-      const clientsResult = await getDocs(q);
-      clientsResult.forEach((client) => {
-        clients.push(client.data());
-      });
-    });
-    return clients;
+    // const clients: Array<IClient | DocumentData> = [];
+    // const namesList: Array<string> = ['Johan Leandro', 'Jesus Antonio'];
+    // namesList.forEach(async (name) => {
+    //   const q = query(clientsCollectionRef, where('names', '==', name));
+    //   const clientsResult = await getDocs(q);
+    //   clientsResult.forEach((client) => {
+    //     clients.push(client.data());
+    //   });
+    // });
+    // return clients;
   }
 }

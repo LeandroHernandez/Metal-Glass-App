@@ -1,0 +1,54 @@
+<!-- <p>product-to-quote-register works!</p> -->
+@if (!productToQuote) {
+<app-global-header [data]="globalHeaderData"></app-global-header>
+}
+<div nz-row nzAlign="middle" nzJustify="center">
+  <div nz-col [nzSpan]="!productToQuote ? 22 : 24">
+    <nz-card nzHoverable>
+      <form nz-form [formGroup]="form" (ngSubmit)="submit($event)">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24">Nombre</nz-form-label>
+          <nz-form-control nzErrorTip="!Este campo es querido¡">
+            <input
+              type="text"
+              nz-input
+              formControlName="name"
+              placeholder="Nombre de producto para cotizar"
+            />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24">Tomados en cuenta</nz-form-label>
+          <nz-form-control nzErrorTip="!Este campo es querido¡">
+            <nz-select
+              formControlName="takenIntoAccount"
+              nzPlaceHolder="Campos tomados en cuenta"
+              nzMode="multiple"
+            >
+              @for(takenIntoAccount of takenIntoAccountList; track $index) {
+              <nz-option
+                [nzValue]="takenIntoAccount.id"
+                [nzLabel]="takenIntoAccount.name"
+              ></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <div nz-row nzAlign="bottom" [nzGutter]="[24, 24]" nzJustify="start">
+          <div nz-col>
+            @if (!form.pristine) {
+            <button
+              type="submit"
+              nz-button
+              nzType="primary"
+              [disabled]="!form.valid"
+            >
+              {{ !productToQuote ? "Registrar" : "Editar" }}
+            </button>
+            }
+          </div>
+        </div>
+      </form>
+    </nz-card>
+  </div>
+</div>

@@ -25,6 +25,9 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { localStorageLabels } from '../../../../constants/localStorageLabels';
+import { NzAffixModule } from 'ng-zorro-antd/affix';
 
 @Component({
   selector: 'app-assignments-content',
@@ -48,6 +51,8 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
     NzModalModule,
     NzButtonModule,
     NzIconModule,
+    NzSpinModule,
+    NzAffixModule,
   ],
   templateUrl: './assignments-content.component.html',
   styleUrl: './assignments-content.component.css',
@@ -84,6 +89,8 @@ export class AssignmentsContentComponent {
   public employeesNames: Array<{ name: string }> = [];
   public theAssignments: Array<string> = [];
 
+  public spinning: boolean = false;
+
   filterForm = this._fb.group({
     whoAssigns: [],
     responsibleForTheAssignment: [],
@@ -95,60 +102,16 @@ export class AssignmentsContentComponent {
     private _modal: NzModalService,
     private _message: NzMessageService,
     private _fb: FormBuilder
-  ) {
-    // localStorage.setItem('spinning', 'true');
-  }
+  ) {}
 
   ngOnInit(): void {
     this.getAssignments();
-    this.getUsers();
-    this.getUsersNames();
-    this.getEmployeesNames();
-  }
-
-  getUsersNames(): void {
-    // this._assignmentsSvc.getUsersNames().subscribe(
-    //   (usersNames) => {
-    //     this.usersNames = usersNames;
-    //   },
-    //   (error) => {
-    //     console.log({ error });
-    //   }
-    // );
-  }
-
-  getEmployeesNames(): void {
-    // this._assignmentsSvc.getEmployeesNames().subscribe(
-    //   (employeesNames) => {
-    //     this.employeesNames = employeesNames;
-    //   },
-    //   (error) => {
-    //     console.log({ error });
-    //   }
-    // );
-  }
-
-  getUsers(): void {
-    // this._assignmentsSvc.getUsers().subscribe(
-    //   (users) => {
-    //     this.users = users;
-    //     this.users.forEach((user) => {
-    //       if (user && user._id) {
-    //         this.whos.push(user.names + ' ' + user.surnames);
-    //         this.administratorsWhoAssignsListView.push({
-    //           label: user.names + ' ' + user.surnames,
-    //           value: user._id,
-    //           checked: true,
-    //         });
-    //       }
-    //     });
-    //   },
-    //   (err) => console.log({ error: err })
-    // );
+    this._assignmentsSvc._storageSvc.remove(localStorageLabels.assignment);
   }
 
   getAssignments(): void {
     this.theAssignments = [];
+    this.spinning = true;
     this._assignmentsSvc.getAssignments().subscribe(
       (assignments) => {
         this.assignments = assignments;
@@ -158,9 +121,11 @@ export class AssignmentsContentComponent {
             ? false
             : this.theAssignments.push(assignment.theAssigned);
         });
+        this.spinning = false;
       },
       (err) => {
         console.log({ error: err });
+        this.spinning = false;
       }
     );
   }
@@ -169,16 +134,6 @@ export class AssignmentsContentComponent {
     this.searchValue = '';
     this.search();
   }
-
-  // search(): void {
-  //   this.visible = false;
-
-  //   if (this.administratorsWhoAssignsListView.length > 0) {
-  //     this.assignmentsView = [];
-  //   } else {
-  //     this.assignmentsView = this.assignments;
-  //   }
-  // }
 
   search(): void {
     const dto = this.removeNullProperties(this.filterForm.value);
@@ -233,42 +188,16 @@ export class AssignmentsContentComponent {
     }
   }
 
-  showEditAssignment(assignment: IAssignment, i: number): void {
-    // const usersNames = this.usersNames;
-    // assignment?.whoAssigns.forEach((who) => {
-    //   // this.usersNames.includes({ name: who })
-    //   //   ? this.usersNames.push({ name: who })
-    //   usersNames.includes({ name: who })
-    //     ? usersNames.push({ name: who })
-    //     : false;
-    // });
-    // const employeesNames = this.employeesNames;
-    // assignment?.responsibleForTheAssignment.forEach((responsible) => {
-    //   employeesNames.includes({ name: responsible })
-    //     ? employeesNames.push({ name: responsible })
-    //     : false;
-    // });
-    const assignmentRegisterComponent = this._modal.info({
+  showEditAssignment(assignment: IAssignment): void {
+    this._modal.info({
       nzIconType: 'edit',
       nzContent: AssignmentRegisterComponent,
-
-      // nzComponentParams: {
-      //   assignment,
-      //   // usersNames: this.usersNames,
-      //   // employeesNames: this.employeesNames,
-      //   usersNames,
-      //   employeesNames,
-      // },
       nzWidth: '90%',
-      // nzOnCancel: () => this.getAssignments(),
-      // nzOnOk: () => this.getAssignments(),
     });
-    localStorage.setItem('assignment', JSON.stringify(assignment));
-    // assignmentRegisterComponent.componentInstance?.assignmentEmitter.subscribe(
-    //   (next) => {
-    //     this.assignments.splice(i, 1, next);
-    //   }
-    // );
+    this._assignmentsSvc.set(
+      localStorageLabels.assignment,
+      JSON.stringify(assignment)
+    );
   }
 
   assignmentDelete(assignment: IAssignment): void {

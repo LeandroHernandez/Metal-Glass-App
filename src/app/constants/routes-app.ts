@@ -27,6 +27,8 @@ export enum RoutesApp {
   quotes = 'cotizaciones',
   quoteView = 'vista-cotizacion',
   quoteRegister = 'registro-cotizacion',
+  productToQuoteEdit = 'editar-producto-para-cotizacion',
+  productToQuoteRegister = 'registro-producto-para-cotizacion',
   accessories = 'accesorios',
   accessoryRegister = 'registro-accesorio',
   profiles = 'perfiles',

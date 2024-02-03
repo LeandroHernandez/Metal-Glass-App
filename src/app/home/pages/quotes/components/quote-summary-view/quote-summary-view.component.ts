@@ -22,6 +22,7 @@ import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import * as moment from 'moment';
+import { localStorageLabels } from '../../../../../constants/localStorageLabels';
 
 @Component({
   selector: 'app-quote-summary-view',
@@ -106,21 +107,30 @@ export class QuoteSummaryViewComponent implements OnInit, OnDestroy {
   }
 
   steInputPropieties(): void {
-    this.quote = JSON.parse(localStorage.getItem('quote') ?? 'null');
+    this.quote = JSON.parse(
+      this._quoteSvc._storageSvc.get(localStorageLabels.quote) ?? 'null'
+    );
     this.formQuoteGeneral = JSON.parse(
-      localStorage.getItem('formQuoteGeneral') ?? 'null'
+      this._quoteSvc._storageSvc.get(localStorageLabels.formQuoteGeneral) ??
+        'null'
     );
     this.productsPerQuote = JSON.parse(
-      localStorage.getItem('productsPerQuote') ?? 'null'
+      this._quoteSvc._storageSvc.get(localStorageLabels.productsPerQuote) ??
+        'null'
     );
     this.typesOfProductsToQuote = JSON.parse(
-      localStorage.getItem('typesOfProductsToQuote') ?? 'null'
+      this._quoteSvc._storageSvc.get(
+        localStorageLabels.typesOfProductsToQuote
+      ) ?? 'null'
     );
     this.registrationActionCondition = JSON.parse(
-      localStorage.getItem('registrationActionCondition') ?? 'null'
+      this._quoteSvc._storageSvc.get(
+        localStorageLabels.registrationActionCondition
+      ) ?? 'null'
     );
     this.editActionCondition = JSON.parse(
-      localStorage.getItem('editActionCondition') ?? 'null'
+      this._quoteSvc._storageSvc.get(localStorageLabels.editActionCondition) ??
+        'null'
     );
   }
 
@@ -186,63 +196,14 @@ export class QuoteSummaryViewComponent implements OnInit, OnDestroy {
         });
       }
     );
-    // this.productsPerQuote.forEach((productPerQuoteItem: { type: string, amountPosition: number, articuleNumber: number }) => {
-    //   this.infoQuote.items.push({
-    //     itemNumber: this.infoQuote.items.length + 1,
-    //     itemDescription: productPerQuoteItem.type,
-    //     itemAmount: productPerQuoteItem.type,
-    //   });
-    // })
   }
 
   getCLients(): void {
-    // this.formQuoteGeneral.clients.forEach((clientItem: IClient | any) => {
-    //   // this._quoteSvc.getOneClient(clientItem.id).subscribe(
-    //   if (typeof clientItem === 'string') {
-    //     this._quoteSvc.getOneClient(clientItem).subscribe(
-    //       (clientDB) => {
-    //         this.clients.push(clientDB);
-    //         this.infoQuote.clientName = clientDB.names;
-    //       },
-    //       (err) => console.log({ err })
-    //     );
-    //   } else {
-    //     if (this.clients.length === 0) {
-    //       this.clients.push(clientItem);
-    //       this.infoQuote.clientName = clientItem.name
-    //         ? '- ' + clientItem.name + '.'
-    //         : '- ' +
-    //           this.infoQuote.clientName +
-    //           clientItem.names +
-    //           ' ' +
-    //           clientItem.surnames +
-    //           `.`;
-    //       this.infoQuote.clientNit = clientItem.Nit;
-    //       // this.infoQuote.contact = clientItem.contact;
-    //       this.infoQuote.address = clientItem.address;
-    //       this.infoQuote.city = clientItem.City;
-    //       this.infoQuote.clientPhone = clientItem.phoneNumber;
-    //       this.infoQuote.mail = clientItem.email;
-    //     } else if (this.clients.length > 0) {
-    //       this.clients.push(clientItem);
-    //       this.infoQuote.clientName +=
-    //         `
-    //         -` +
-    //         clientItem.names +
-    //         ' ' +
-    //         clientItem.surnames +
-    //         `.`;
-    //     }
-    //   }
-    // });
     Array.isArray(this.formQuoteGeneral.client)
       ? this.formQuoteGeneral.client.forEach((clientId: string) => {
           this._quoteSvc
             .getOneClient(clientId)
-            .then((clientDB) => {
-              // this.clients.push(clientDB);
-              // this.infoQuote.clientName = clientDB.names;
-            })
+            .then((clientDB) => {})
             .catch((error) => {
               console.log({ error });
             });
@@ -398,14 +359,6 @@ export class QuoteSummaryViewComponent implements OnInit, OnDestroy {
           createdAt: this.changeFormat(new Date()),
           updatedAt: this.changeFormat(new Date()),
         };
-        // quoteDTO.formQuoteGeneralArray.forEach(
-        //   (formQuoteGeneralArrayItem: any) => {
-        //     formQuoteGeneralArrayItem.accessory = JSON.stringify(
-        //       formQuoteGeneralArrayItem.accessory
-        //     );
-        //   }
-        // );
-        // console.log({ quoteDTO });
         this._quoteSvc
           .registerQuote(quoteDTO)
           .then((quoteDB) => {
@@ -448,8 +401,14 @@ export class QuoteSummaryViewComponent implements OnInit, OnDestroy {
       // nzOnCancel: () => this.getProducts(),
       // nzOnOk: () => this.getProducts(),
     });
-    localStorage.setItem('quote', JSON.stringify(quote));
-    localStorage.setItem('editActionCondition', JSON.stringify(true));
+    this._quoteSvc._storageSvc.set(
+      localStorageLabels.quote,
+      JSON.stringify(quote)
+    );
+    this._quoteSvc._storageSvc.set(
+      localStorageLabels.editActionCondition,
+      JSON.stringify(true)
+    );
   }
 
   editQuote(event?: Event | any): void {

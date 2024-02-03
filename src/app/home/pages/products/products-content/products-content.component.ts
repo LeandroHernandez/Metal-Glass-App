@@ -18,8 +18,10 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzMessageModule, NzMessageService } from 'ng-zorro-antd/message';
+import { NzAffixModule } from 'ng-zorro-antd/affix';
 import { IPhoto } from '../../../../../interfaces/photo.interface';
 import { PhotosViewComponent } from '../photos-view/photos-view.component';
+import { localStorageLabels } from '../../../../constants/localStorageLabels';
 
 @Component({
   selector: 'app-products-content',
@@ -40,6 +42,7 @@ import { PhotosViewComponent } from '../photos-view/photos-view.component';
     NzIconModule,
     NzAlertModule,
     NzMessageModule,
+    NzAffixModule,
   ],
   template: `
     <!-- <p>
@@ -63,118 +66,123 @@ import { PhotosViewComponent } from '../photos-view/photos-view.component';
           </div>
         </div>
       </div>
-      <div nz-col [nzSpan]="22" [nzLg]="16">
+      <div nz-col [nzSpan]="22">
         <!-- <div nz-row [nzGutter]="24" nzAlign="middle" nzJustify="center">
           <div nz-col nzSpan="22"></div>
         </div> -->
-        <nz-table #basicTable [nzData]="products" [nzScroll]="{ x: '99%' }">
-          <thead>
-            <tr>
-              <th nzWidth="180px">
-                Nombre
-                <form nz-form [formGroup]="filterForm">
-                  <div nz-row nzAlign="middle" nzJustify="space-between">
-                    <div nz-col nzSpan="22">
-                      <nz-select
-                        type="text"
-                        title="Nombre"
-                        formControlName="name"
-                        nzPlaceHolder="Nombre"
-                        (ngModelChange)="filter()"
-                        nzMode="default"
-                      >
-                        <nz-option
-                          *ngFor="let name of productsNames"
-                          [nzValue]="name"
-                          [nzLabel]="name"
-                        ></nz-option>
-                      </nz-select>
+        <nz-spin [nzTip]="'Cargando...'" [nzSpinning]="spinning">
+          <nz-table #basicTable [nzData]="products" [nzScroll]="{ x: '99%' }">
+            <thead>
+              <tr>
+                <th nzWidth="180px">
+                  Nombre
+                  <form nz-form [formGroup]="filterForm">
+                    <div nz-row nzAlign="middle" nzJustify="space-between">
+                      <div nz-col nzSpan="22">
+                        <nz-select
+                          type="text"
+                          title="Nombre"
+                          formControlName="name"
+                          nzPlaceHolder="Nombre"
+                          (ngModelChange)="filter()"
+                          nzMode="default"
+                        >
+                          <nz-option
+                            *ngFor="let name of productsNames"
+                            [nzValue]="name"
+                            [nzLabel]="name"
+                          ></nz-option>
+                        </nz-select>
+                      </div>
+                      <div nz-col nzSpan="2">
+                        <button
+                          title="restear"
+                          type="button"
+                          nz-button
+                          nzType="primary"
+                          (click)="filterForm.reset(); getProducts()"
+                        >
+                          <span nz-icon nzType="reload"></span>
+                        </button>
+                      </div>
                     </div>
-                    <div nz-col nzSpan="2">
+                  </form>
+                </th>
+                <th nzWidth="180px">Descripción</th>
+                <th nzWidth="180px">Imagenes</th>
+                <th nzWidth="120px">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of basicTable.data; let i = index">
+                <td>{{ product.name }}</td>
+                <td>{{ product.description }}</td>
+                <td>
+                  <div class="scrollProductPhotos">
+                    <div nz-row nzAlign="middle" nzJustify="center">
+                      <div nz-col>
+                        <!-- <nz-card> -->
+                        <img
+                          *ngFor="let photo of product.photos"
+                          [src]="photo.url"
+                          [alt]="'Foto de ' + product.name"
+                          [title]="photo.name"
+                          (click)="showPhotoView(photo)"
+                        />
+                        <!-- </nz-card> -->
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div nz-row nzJustify="space-evenly">
+                    <div nz-col>
                       <button
-                        title="restear"
-                        type="button"
                         nz-button
                         nzType="primary"
-                        (click)="filterForm.reset(); getProducts()"
+                        nzShape="circle"
+                        title="Ver"
+                        type="button"
+                        (click)="editProduct(product.id ?? '', product)"
                       >
-                        <span nz-icon nzType="reload"></span>
+                        <span nz-icon nzType="edit" title="Editar"></span>
                       </button>
                     </div>
-                  </div>
-                </form>
-              </th>
-              <th nzWidth="180px">Descripción</th>
-              <th nzWidth="180px">Imagenes</th>
-              <th nzWidth="120px">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let product of basicTable.data; let i = index">
-              <td>{{ product.name }}</td>
-              <td>{{ product.description }}</td>
-              <td>
-                <div class="scrollProductPhotos">
-                  <div nz-row nzAlign="middle" nzJustify="center">
                     <div nz-col>
-                      <!-- <nz-card> -->
-                      <img
-                        *ngFor="let photo of product.photos"
-                        [src]="photo.url"
-                        [alt]="'Foto de ' + product.name"
-                        [title]="photo.name"
-                        (click)="showPhotoView(photo)"
-                      />
-                      <!-- </nz-card> -->
+                      <a
+                        nz-button
+                        nzType="link"
+                        nzType="primary"
+                        nzShape="circle"
+                        nzDanger
+                        title="Eliminar"
+                        nz-popover
+                        (click)="
+                          productPerDelete = product;
+                          productPerDeletePositon = i
+                        "
+                      >
+                        <span nz-icon nzType="delete" title="Eliminar"></span
+                      ></a>
                     </div>
                   </div>
-                </div>
-              </td>
-              <td>
-                <div nz-row nzJustify="space-evenly">
-                  <div nz-col>
-                    <button
-                      nz-button
-                      nzType="primary"
-                      nzShape="circle"
-                      title="Ver"
-                      type="button"
-                      (click)="editProduct(product.id ?? '', product)"
-                    >
-                      <span nz-icon nzType="eye" title="Editar"></span>
-                    </button>
-                  </div>
-                  <div nz-col>
-                    <a
-                      nz-button
-                      nzType="link"
-                      nzType="primary"
-                      nzShape="circle"
-                      nzDanger
-                      title="Eliminar"
-                      nz-popover
-                      (click)="
-                        productPerDelete = product; productPerDeletePositon = i
-                      "
-                    >
-                      <span nz-icon nzType="delete" title="Eliminar"></span
-                    ></a>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </nz-table>
+                </td>
+              </tr>
+            </tbody>
+          </nz-table>
+        </nz-spin>
       </div>
     </div>
     <div nz-row *ngIf="productPerDelete" nzJustify="center">
       <div nz-col [nzSpan]="22">
-        <nz-alert
-          nzShowIcon
-          nzType="warning"
-          nzMessage="¿Seguro?"
-          [nzDescription]="descriptionTemplate2"
-        ></nz-alert>
+        <nz-affix [nzOffsetBottom]="10">
+          <nz-alert
+            nzShowIcon
+            nzType="warning"
+            nzMessage="¿Seguro?"
+            [nzDescription]="descriptionTemplate2"
+          ></nz-alert>
+        </nz-affix>
         <ng-template #descriptionTemplate2>
           <!-- <p>Info Description Info Description Info Description Info Description</p> -->
           <p>Seguro de eliminar a {{ productPerDelete.name }}</p>
@@ -281,21 +289,30 @@ export class ProductsContentComponent implements OnInit, OnDestroy {
         this.products = res;
         this.productsNames = [];
         res.forEach((product) => {
-          this.productsNames.push(product.name);
+          // this.productsNames.push(product.name);
+          this.productsNames.includes(product.name)
+            ? false
+            : this.productsNames.push(product.name);
         });
+        this.spinning = false;
       },
-      (error) => console.log({ error })
+      (error) => {
+        console.log({ error });
+        this.spinning = false;
+      }
     );
-    this.spinning = false;
   }
 
   editProduct(id: string, productDto: any): void {
     this._modal.info({
       nzIconType: 'edit',
       nzContent: ProductsRegisterComponent,
-      nzWidth: '90%',
+      // nzWidth: '90%',
     });
-    localStorage.setItem('product', JSON.stringify(productDto));
+    this._productsSvc._storageSvc.set(
+      localStorageLabels.product,
+      JSON.stringify(productDto)
+    );
   }
 
   deleteProduct(product: IProduct): void {
@@ -340,8 +357,10 @@ export class ProductsContentComponent implements OnInit, OnDestroy {
       nzContent: PhotosViewComponent,
       nzWidth: '90%',
     });
-    // localStorage.setItem('photos', JSON.stringify(photos));
-    localStorage.setItem('photo', JSON.stringify(photo));
+    this._productsSvc._storageSvc.set(
+      localStorageLabels.photo,
+      JSON.stringify(photo)
+    );
     photosViewComponent.componentInstance?.deletePhotoEmitter.subscribe(() => {
       this._message.success('La imagen fue eliminada correcta mente');
       photosViewComponent.close();
@@ -349,6 +368,6 @@ export class ProductsContentComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    localStorage.removeItem('product');
+    this._productsSvc._storageSvc.remove(localStorageLabels.product);
   }
 }

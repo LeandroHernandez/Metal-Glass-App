@@ -24,6 +24,7 @@ import { FormGuard } from './home/pages/quotes/pulled-apart/form/form.guard';
 import { FormComponent } from './home/pages/quotes/pulled-apart/form/form.component';
 import { ProductsContentComponent } from './home/pages/products/products-content/products-content.component';
 import { ProductsRegisterComponent } from './home/pages/products/products-register/products-register.component';
+import { ProductToQuoteRegisterComponent } from './home/pages/quotes/components/products-to-quote/product-to-quote-register/product-to-quote-register.component';
 
 export const routes: Routes = [
   {
@@ -118,6 +119,14 @@ export const routes: Routes = [
           {
             path: RoutesApp.quoteRegister,
             component: QuoteFormComponent,
+          },
+          {
+            path: RoutesApp.productToQuoteEdit,
+            component: ProductToQuoteRegisterComponent,
+          },
+          {
+            path: RoutesApp.productToQuoteRegister,
+            component: ProductToQuoteRegisterComponent,
           },
           { path: '**', redirectTo: RoutesApp.root, pathMatch: 'full' },
         ],

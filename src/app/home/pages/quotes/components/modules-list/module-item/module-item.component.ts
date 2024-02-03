@@ -4,6 +4,8 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { IPulledApartData } from '../../../../../../../interfaces/pulled-apart-data.interface';
 import { Router } from '@angular/router';
 import { RoutesApp } from '../../../../../../constants';
+import { QuotesService } from '../../../quotes.service';
+import { localStorageLabels } from '../../../../../../constants/localStorageLabels';
 
 @Component({
   selector: 'app-module-item',
@@ -35,11 +37,11 @@ export class ModuleItemComponent {
     pulledApartData: IPulledApartData | null;
   } | null = null;
 
-  constructor(private _router: Router) {}
+  constructor(private _router: Router, private _quotesSvc: QuotesService) {}
 
   openPulledApart(): void {
-    localStorage.setItem(
-      'pulledApartData',
+    this._quotesSvc._storageSvc.set(
+      localStorageLabels.pulledApartData,
       JSON.stringify(this.modul?.pulledApartData)
     );
     this._router.navigate([`${RoutesApp.home}/${this.modul?.route}`]);

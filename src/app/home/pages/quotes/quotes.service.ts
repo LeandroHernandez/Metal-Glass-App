@@ -26,6 +26,7 @@ import { IClient } from '../../../../interfaces/client.interface';
 import { IGlass } from '../../../../interfaces/glass.interface';
 import { IAcrylic } from '../../../../interfaces/acrylic.interface';
 import { IAditionalReference } from '../../../../interfaces/aditional-reference.interface';
+import { BrowserStorageService } from '../../../browser-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -65,7 +66,10 @@ export class QuotesService {
 
   private _db = getFirestore();
 
-  constructor(private _fireStore: Firestore) {}
+  constructor(
+    private _fireStore: Firestore,
+    public _storageSvc: BrowserStorageService
+  ) {}
 
   registerQuote(quoteDTO: any): Promise<DocumentReference<any, DocumentData>> {
     return addDoc(this._quotesRef, quoteDTO);
@@ -143,65 +147,12 @@ export class QuotesService {
     const quotes: Array<IQuote | DocumentData | any> = [];
     q = query(
       quotesCollectionRef,
-      // where('names', 'array-contains', filterDto[keyName])
-      // where('clientName', '==', filterDto[keyName])
       where('clientName', '==', filterDto.clientName)
     );
     const quotesQueryResult = await getDocs(q);
     quotesQueryResult.forEach((quote) => {
       quotes.push(quote.data());
     });
-    // Object.keys(filterDto).forEach(async (keyName) => {
-    //   if (keyName === 'clientName') {
-    //     q = query(
-    //       quotesCollectionRef,
-    //       // where('names', 'array-contains', filterDto[keyName])
-    //       where('clientName', '==', filterDto[keyName])
-    //     );
-    //     const quotesQueryResult = await getDocs(q);
-    //     quotesQueryResult.forEach((quote) => {
-    //       quotes.includes(quote.data())
-    //         ? console.log('ya existe')
-    //         : quotes.push(quote.data());
-    //     });
-    //   }
-    //   if (keyName === 'others') {
-    //     q = query(
-    //       quotesCollectionRef,
-    //       where('others', '==', filterDto[keyName])
-    //     );
-    //     const quotesQueryResult = await getDocs(q);
-    //     quotesQueryResult.forEach((quote) => {
-    //       quotes.includes(quote.data())
-    //         ? console.log('ya existe')
-    //         : quotes.push(quote.data());
-    //     });
-    //   }
-    //   if (keyName === 'extraPercentage') {
-    //     q = query(
-    //       quotesCollectionRef,
-    //       where('extraPercentage', '==', filterDto[keyName])
-    //     );
-    //     const quotesQueryResult = await getDocs(q);
-    //     quotesQueryResult.forEach((quote) => {
-    //       quotes.includes(quote.data())
-    //         ? console.log('ya existe')
-    //         : quotes.push(quote.data());
-    //     });
-    //   }
-    //   if (keyName === 'generalValue') {
-    //     q = query(
-    //       quotesCollectionRef,
-    //       where('generalValue', '==', filterDto[keyName])
-    //     );
-    //     const quotesQueryResult = await getDocs(q);
-    //     quotesQueryResult.forEach((quote) => {
-    //       quotes.includes(quote.data())
-    //         ? console.log('ya existe')
-    //         : quotes.push(quote.data());
-    //     });
-    //   }
-    // });
     return quotes;
   }
 }

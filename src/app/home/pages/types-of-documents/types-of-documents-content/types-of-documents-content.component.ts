@@ -14,6 +14,8 @@ import { TypesOfDocumentsService } from '../types-of-documents.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ITypeDocument } from '../../../../../interfaces/type-document.interface';
 import { RegisterDocumentTypeComponent } from '../register-document-type/register-document-type.component';
+import { localStorageLabels } from '../../../../constants/localStorageLabels';
+import { NzAffixModule } from 'ng-zorro-antd/affix';
 
 @Component({
   selector: 'app-types-of-documents-content',
@@ -30,6 +32,7 @@ import { RegisterDocumentTypeComponent } from '../register-document-type/registe
     NzAlertModule,
     NzIconModule,
     NzModalModule,
+    NzAffixModule,
   ],
   providers: [NzModalService],
   template: `
@@ -82,41 +85,45 @@ import { RegisterDocumentTypeComponent } from '../register-document-type/registe
         </ng-template>
       </div>
     </div>
-    <div nz-col [nzSpan]="22" *ngIf="typeOfDocumentPerDelete">
-      <nz-alert
-        nzShowIcon
-        nzType="warning"
-        nzMessage="¿Seguro?"
-        [nzDescription]="descriptionTemplate2"
-      ></nz-alert>
-      <ng-template #descriptionTemplate2>
-        <!-- <p>Info Description Info Description Info Description Info Description</p> -->
-        <p>Seguro de eliminar a {{ typeOfDocumentPerDelete.type }}</p>
-        <div nz-row nzAlign="middle" [nzGutter]="[24, 24]" nzJustify="end">
-          <div nz-col>
-            <button
-              nz-button
-              nzType="primary"
-              nzDanger
-              (click)="delete(typeOfDocumentPerDelete.id ?? '')"
-            >
-              Eliminar
-            </button>
+    <div nz-row nzAlign="bottom" nzJustify="center">
+      <div nz-col [nzSpan]="22" *ngIf="typeOfDocumentPerDelete">
+        <nz-affix [nzOffsetBottom]="10">
+          <nz-alert
+            nzShowIcon
+            nzType="warning"
+            nzMessage="¿Seguro?"
+            [nzDescription]="descriptionTemplate2"
+          ></nz-alert>
+        </nz-affix>
+        <ng-template #descriptionTemplate2>
+          <!-- <p>Info Description Info Description Info Description Info Description</p> -->
+          <p>Seguro de eliminar a {{ typeOfDocumentPerDelete.type }}</p>
+          <div nz-row nzAlign="middle" [nzGutter]="[24, 24]" nzJustify="end">
+            <div nz-col>
+              <button
+                nz-button
+                nzType="primary"
+                nzDanger
+                (click)="delete(typeOfDocumentPerDelete.id ?? '')"
+              >
+                Eliminar
+              </button>
+            </div>
+            <div nz-col>
+              <button
+                nz-button
+                nzType="primary"
+                (click)="
+                  typeOfDocumentPerDelete = null;
+                  typeOfDocumentPerDeletePositon = null
+                "
+              >
+                Mejor no
+              </button>
+            </div>
           </div>
-          <div nz-col>
-            <button
-              nz-button
-              nzType="primary"
-              (click)="
-                typeOfDocumentPerDelete = null;
-                typeOfDocumentPerDeletePositon = null
-              "
-            >
-              Mejor no
-            </button>
-          </div>
-        </div>
-      </ng-template>
+        </ng-template>
+      </div>
     </div>
   `,
   styles: `nz-card {
@@ -156,13 +163,11 @@ export class TypesOfDocumentsContentComponent implements OnInit {
     private _message: NzMessageService,
     private _modal: NzModalService,
     private _router: Router
-  ) {
-    // localStorage.setItem('spinning', 'true');
-  }
+  ) {}
 
   ngOnInit(): void {
     this.getDocumentTypes();
-    localStorage.removeItem('documentType');
+    this._typesDocumentsSvc._storageSvc.remove(localStorageLabels.documentType);
   }
 
   getDocumentTypes(): void {
@@ -188,7 +193,10 @@ export class TypesOfDocumentsContentComponent implements OnInit {
       // nzData: documentType,
       nzWidth: '90%',
     });
-    localStorage.setItem('documentType', JSON.stringify(documentType));
+    this._typesDocumentsSvc._storageSvc.set(
+      localStorageLabels.documentType,
+      JSON.stringify(documentType)
+    );
     // typeOfDocumentRegisterComponent.afterOpen.subscribe(() => {
     //   this._typesDocumentsSvc.setTypeDocument(typeDocument);
     // });
@@ -217,7 +225,7 @@ export class TypesOfDocumentsContentComponent implements OnInit {
 
   registerAction(): void {
     // this._typesDocumentsSvc.typeDocument = null;
-    localStorage.removeItem('documentType');
+    this._typesDocumentsSvc._storageSvc.remove(localStorageLabels.documentType);
     this._router.navigate([
       `${RoutesApp.home}/${RoutesApp.documentTypes}/${RoutesApp.documentTypeRegister}`,
     ]);

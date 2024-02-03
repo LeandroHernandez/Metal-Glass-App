@@ -14,6 +14,7 @@ import {
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ITypeDocument } from '../../../../interfaces/type-document.interface';
 import { DbCollections } from '../../../constants/db-collections';
+import { BrowserStorageService } from '../../../browser-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -31,7 +32,10 @@ export class TypesOfDocumentsService {
   //   this.typeDocumentSubject.next(typeDocument);
   // }
 
-  constructor(private _fireStore: Firestore) {}
+  constructor(
+    private _fireStore: Firestore,
+    public _storageSvc: BrowserStorageService
+  ) {}
 
   getDocumentTypes(): Observable<Array<ITypeDocument>> {
     // return this._http.get<Array<ITypeDocument>>(`${this._api}/type-document`);

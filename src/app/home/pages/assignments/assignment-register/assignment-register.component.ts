@@ -1,5 +1,11 @@
 import { DatePipe, NgFor, NgIf } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  Output,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GlobalHeaderComponent } from '../../../global-header/global-header.component';
@@ -17,6 +23,7 @@ import { NzMessageModule, NzMessageService } from 'ng-zorro-antd/message';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { IAssignmentRegisterRequest } from '../../../../../interfaces-request/assignment-register.inerface';
+import { localStorageLabels } from '../../../../constants/localStorageLabels';
 
 @Component({
   selector: 'app-assignment-register',
@@ -39,7 +46,7 @@ import { IAssignmentRegisterRequest } from '../../../../../interfaces-request/as
   templateUrl: './assignment-register.component.html',
   styleUrl: './assignment-register.component.css',
 })
-export class AssignmentRegisterComponent {
+export class AssignmentRegisterComponent implements OnDestroy {
   @Output() assignmentEmitter: EventEmitter<IAssignment> = new EventEmitter();
   @Input() assignment: IAssignment | null = null;
   @Input() usersNames: Array<{ name: string }> = [];
@@ -54,10 +61,6 @@ export class AssignmentRegisterComponent {
   };
 
   public employeeId: string = '';
-  // public users: IUser[] = [];
-  // public adminsList: IUser[] = [];
-  // public employeesList: IEmployee[] = [];
-  // public user: IUser | null = null;
   public users: any[] = [];
   public adminsList: any[] = [];
   public employeesList: any[] = [];
@@ -87,6 +90,10 @@ export class AssignmentRegisterComponent {
     this.getUser();
     this.getUsers();
     this.getEmployees();
+    this.assignment = JSON.parse(
+      this._assignmentsSvc._storageSvc.get(localStorageLabels.assignment) ??
+        'null'
+    );
     this.assignment
       ? this.initForm(this.assignment)
       : (this.getUsersNames(), this.getEmployeesNames());
@@ -146,75 +153,54 @@ export class AssignmentRegisterComponent {
     }
   }
 
-  getUser(): void {
-    // const accessToken = localStorage.getItem('accessToken');
-    // if (accessToken) {
-    //   const accessTokenParse: IAccessToken = JSON.parse(accessToken);
-    //   this._assignmentsSvc.getUser(accessTokenParse.userId).subscribe(
-    //     (user) => {
-    //       this.user = user;
-    //     },
-    //     (err) => console.log({ error: err })
-    //   );
-    // }
-  }
+  getUser(): void {}
 
-  getUsers(): void {
-    // this._assignmentsSvc.getUsers().subscribe(
-    //   (users) => {
-    //     this.users = users;
-    //     this.adminsList = users;
-    //   },
-    //   (err) => console.log({ error: err })
-    // );
-  }
+  getUsers(): void {}
 
-  getEmployees(): void {
-    // this._assignmentsSvc.getEmployees().subscribe(
-    //   (employees) => {
-    //     this.employeesList = employees;
-    //     this.employeesList.forEach((employee) => {
-    //       this.employeesList.includes(employee)
-    //         ? this.employeesList.push(employee)
-    //         : false;
-    //     });
-    //   },
-    //   (err) => console.log({ error: err })
-    // );
-  }
+  getEmployees(): void {}
 
   registerAssignment(): void {
     if (!this.registerAssignmentForm.valid) {
       this._message.error('El formulario no es valido');
       return;
     }
-    // if (!this.user) {
-    //   this.getUser();
-    //   this._message.error(
-    //     'Hubo un error interno, por favor vuelva a intentarlo'
-    //   );
-    //   return;
-    // }
-    const body: IAssignmentRegisterRequest = {
-      theAssigned: this.registerAssignmentForm.value.theAssigned ?? '',
-      whoAssigns: this.registerAssignmentForm.value.whoAssigns ?? [''],
-      responsibleForTheAssignment: this.registerAssignmentForm.value
-        .responsibleForTheAssignment ?? [''],
-      registerDate: this.changeFormat(new Date()),
-      lastUpdateDate: this.changeFormat(new Date()),
-    };
-    this._assignmentsSvc
-      .registerAssignment(body)
-      .then((res) => {
-        this._message.success('La assignación fue registrada exitosamente');
-        this.registerAssignmentForm.reset();
-      })
-      .catch((error) => {
-        console.log({ error });
-        this._message.success(
-          'Hubo un error con el registro de la asignación, por favor vuelva a intentarlo'
-        );
-      });
+    if (this.assignment && this.assignment.id) {
+      this._assignmentsSvc
+        .editAssignment(this.assignment.id, {
+          ...this.assignment,
+          ...this.registerAssignmentForm.value,
+        })
+        .then((assignmentPostEdit) => {
+          this._message.success('La assignación fue editada exitosamente');
+        })
+        .catch((error) => {
+          console.log({ error });
+          this._message.success(
+            'Hubo un error con el registro de la edicion, por favor vuelva a intentarlo'
+          );
+        });
+    } else {
+      const body: IAssignmentRegisterRequest = {
+        theAssigned: this.registerAssignmentForm.value.theAssigned ?? '',
+        whoAssigns: this.registerAssignmentForm.value.whoAssigns ?? [''],
+        responsibleForTheAssignment: this.registerAssignmentForm.value
+          .responsibleForTheAssignment ?? [''],
+        registerDate: this.changeFormat(new Date()),
+        lastUpdateDate: this.changeFormat(new Date()),
+      };
+      this._assignmentsSvc
+        .registerAssignment(body)
+        .then((res) => {
+          this._message.success('La assignación fue registrada exitosamente');
+          this.registerAssignmentForm.reset();
+        })
+        .catch((error) => {
+          console.log({ error });
+          this._message.success(
+            'Hubo un error con el registro de la asignación, por favor vuelva a intentarlo'
+          );
+        });
+    }
   }
 
   changeFormat(date: Date): string {
@@ -246,23 +232,9 @@ export class AssignmentRegisterComponent {
       );
       return;
     }
-    // localStorage.setItem('spinning', 'true');
-    // this._assignmentsSvc
-    //   .editAssignment(assignamentId, this.registerAssignmentForm.value)
-    //   .subscribe(
-    //     (assignment) => {
-    //       this._message.success('La edicion de la asignación, fue exitosa');
-    //       // this._router.navigate(['/admin/home/asignaciones']);
-    //       this.assignmentEmitter.emit(assignment);
-    //       localStorage.setItem('spinning', 'false');
-    //     },
-    //     (error) => {
-    //       console.log({ error });
-    //       this._message.error(
-    //         'Hubo un error interno, por favor vuelva a intentarlo'
-    //       );
-    //       localStorage.setItem('spinning', 'false');
-    //     }
-    //   );
+  }
+
+  ngOnDestroy() {
+    this._assignmentsSvc._storageSvc.remove(localStorageLabels.assignment);
   }
 }

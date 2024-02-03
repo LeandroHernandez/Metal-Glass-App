@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { GlobalHeaderComponent } from '../../../global-header/global-header.component';
+import { ProductsToQuoteComponent } from '../components/products-to-quote/products-to-quote.component';
 import { ModulesListComponent } from '../components/modules-list/modules-list.component';
 import { ListQuotesComponent } from '../components/list-quotes/list-quotes.component';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -15,6 +16,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
   imports: [
     RouterLink,
     GlobalHeaderComponent,
+    ProductsToQuoteComponent,
     ModulesListComponent,
     ListQuotesComponent,
     NzGridModule,
@@ -40,6 +42,19 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
       >
         <nz-divider nzText="Apartados referentes"></nz-divider>
         <app-modules-list></app-modules-list>
+      </div>
+      <div
+        nz-col
+        [nzXXl]="22"
+        [nzXl]="22"
+        [nzLg]="22"
+        [nzMd]="22"
+        [nzSm]="22"
+        [nzXs]="22"
+      >
+        <nz-divider nzText="Productos para cotizar"></nz-divider>
+        <!-- <app-modules-list></app-modules-list> -->
+        <app-products-to-quote></app-products-to-quote>
       </div>
       <div
         nz-col

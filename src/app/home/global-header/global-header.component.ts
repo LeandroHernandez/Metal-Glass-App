@@ -26,7 +26,6 @@ export class GlobalHeaderComponent {
     this._authSvc
       .logout()
       .then((response) => {
-        // localStorage.removeItem('accessToken');
         this._authSvc.removeToken();
         this._router.navigate([RoutesApp.auth]);
       })

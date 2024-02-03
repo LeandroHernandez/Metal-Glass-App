@@ -10,6 +10,8 @@ import { IPulledApart } from '../../../../../../interfaces/pulled-apart.interfac
 import { IPulledApartData } from '../../../../../../interfaces/pulled-apart-data.interface';
 import { IDataForm } from '../../../../../../interfaces/form-data.interface';
 import { RoutesApp } from '../../../../../constants';
+import { QuotesService } from '../../quotes.service';
+import { localStorageLabels } from '../../../../../constants/localStorageLabels';
 
 @Component({
   selector: 'app-pulled-apart-content',
@@ -107,7 +109,7 @@ export class PulledApartContentComponent implements OnInit {
 
   public dataForm: IDataForm | any | null = null;
 
-  constructor(private _router: Router) {}
+  constructor(private _router: Router, private _quotesSvc: QuotesService) {}
 
   ngOnInit(): void {
     this.dataLoad();
@@ -132,7 +134,9 @@ export class PulledApartContentComponent implements OnInit {
   }
 
   dataLoad(): void {
-    const pulledApartData = localStorage.getItem('pulledApartData');
+    const pulledApartData = this._quotesSvc._storageSvc.get(
+      localStorageLabels.pulledApartData
+    );
     if (pulledApartData) {
       const pulledApartDataParse: IPulledApartData =
         JSON.parse(pulledApartData);
@@ -162,8 +166,11 @@ export class PulledApartContentComponent implements OnInit {
   deleteAcrylic(acrylicId: string): void {}
 
   registerFunction(): void {
-    localStorage.removeItem('dataForm');
-    localStorage.setItem('dataForm', JSON.stringify(this.dataForm));
+    this._quotesSvc._storageSvc.remove(localStorageLabels.dataForm);
+    this._quotesSvc._storageSvc.set(
+      localStorageLabels.dataForm,
+      JSON.stringify(this.dataForm)
+    );
     if (this.pulledApartData?.reference === 'perfil') {
       this._router.navigate([
         `${RoutesApp.home}/${this.pulledApartData?.reference}es/registro-${this.pulledApartData?.reference}`,
@@ -186,9 +193,9 @@ export class PulledApartContentComponent implements OnInit {
     this.pulledApartsView = pulledAparts;
     if (this.pulledApartData) {
       this.pulledApartData.pulledAparts = pulledAparts;
-      localStorage.removeItem('pulledApartData');
-      localStorage.setItem(
-        'pulledApartData',
+      this._quotesSvc._storageSvc.remove(localStorageLabels.pulledApartData);
+      this._quotesSvc._storageSvc.set(
+        localStorageLabels.pulledApartData,
         JSON.stringify(this.pulledApartData)
       );
     }

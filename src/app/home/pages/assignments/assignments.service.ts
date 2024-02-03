@@ -18,6 +18,7 @@ import {
 import { Observable } from 'rxjs';
 import { DbCollections } from '../../../constants/db-collections';
 import { IAssignment } from '../../../../interfaces/assignment.interface';
+import { BrowserStorageService } from '../../../browser-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -30,7 +31,10 @@ export class AssignmentsService {
 
   private _db = getFirestore();
 
-  constructor(private _fireStore: Firestore) {}
+  constructor(
+    private _fireStore: Firestore,
+    public _storageSvc: BrowserStorageService
+  ) {}
 
   registerAssignment(
     assignmentDTO: any
@@ -83,5 +87,9 @@ export class AssignmentsService {
       assignments.push(assignment.data());
     });
     return assignments;
+  }
+
+  set(key: string, value: string) {
+    return this._storageSvc.set(key, value);
   }
 }

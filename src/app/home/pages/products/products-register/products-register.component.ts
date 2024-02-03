@@ -18,6 +18,7 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzListModule } from 'ng-zorro-antd/list';
+import { localStorageLabels } from '../../../../constants/localStorageLabels';
 
 @Component({
   selector: 'app-products-register',
@@ -90,7 +91,6 @@ import { NzListModule } from 'ng-zorro-antd/list';
                       id="uploadFiles"
                       (change)="selectedPhotosEvent($event)"
                     />
-                    <!-- (change)="spinning = true; selectedPhotosEvent($event)" -->
                     <label for="uploadFiles" class="labelInputUploadFiles">
                       Seleccionar fotos
                     </label>
@@ -143,7 +143,6 @@ import { NzListModule } from 'ng-zorro-antd/list';
                 (click)="uploadFiles()"
                 class="uploadFilesButton"
               >
-                <!-- (click)="spinning = true; uploadFiles()" -->
                 Cargar Fotos
               </button>
               <br />
@@ -238,7 +237,9 @@ export class ProductsRegisterComponent implements OnInit {
   }
 
   getInputProperties(): void {
-    this.product = JSON.parse(localStorage.getItem('product') ?? 'null');
+    this.product = JSON.parse(
+      this._productsSvc._storageSvc.get(localStorageLabels.product) ?? 'null'
+    );
   }
 
   setIntFormValues(product: IProduct): void {
@@ -247,8 +248,6 @@ export class ProductsRegisterComponent implements OnInit {
   }
 
   selectedPhotosEvent(event: any) {
-    // this.selectedPhotos = event.target.files;
-    // this.uploadFiles();
     const invalidFiles: Array<File> = [];
     for (let i = 0; i < event.target.files.length; i++) {
       if (event.target.files[i].type.indexOf('image') === -1) {
@@ -272,11 +271,9 @@ export class ProductsRegisterComponent implements OnInit {
         };
       }
     }
-    // this.spinning = false;
   }
 
   uploadFiles() {
-    // const photos: Array<string> = [];
     if (this.product && this.product.id) {
       this._productsSvc
         .uploadFile(this.selectedPhotos, {
@@ -292,27 +289,9 @@ export class ProductsRegisterComponent implements OnInit {
             'Hubo un error por lo que no fue posible editar el producto, por favor vuelva a intentarlo'
           );
         });
-      // for (let i = 0; i < this.selectedPhotos.length; i++) {
-      //   console.log({
-      //     name: Date.now() + '_' + this.selectedPhotos[i].name,
-      //     imageData: this.selectedPhotos[i].imageData,
-      //   });
-      //   // this._productsSvc
-      //   //   .uploadFile(
-      //   //     Date.now() + '_' + this.selectedPhotos[i].name,
-      //   //     this.selectedPhotos[i].imageData
-      //   //   )
-      //   //   .then((photoUrl) => {
-      //   //     // .then((fileResponse) => {
-      //   //     console.log({ photoUrl });
-      //   //     photoUrl ? photos.push(photoUrl) : false;
-      //   //   });
-      // }
-      // this.submit({ ...this.form.value, photos });
     }
   }
 
-  // submit(productDto: any) {
   submit(product: any) {
     if (this.form.invalid) {
       this._message.warning(

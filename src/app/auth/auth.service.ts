@@ -6,46 +6,32 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from '@angular/fire/auth';
-// import { Inject, Injectable, InjectionToken } from '@angular/core';
-// export const BROWSER_STORAGE = new InjectionToken<Storage>('Browser Storage', {
-//   providedIn: 'root',
-//   factory: () => localStorage,
-// });
+import { localStorageLabels } from '../constants/localStorageLabels';
+import { BrowserStorageService } from '../browser-storage.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   constructor(
-    private _auth: Auth // @Inject(BROWSER_STORAGE) private _storage: Storage
+    private _auth: Auth,
+    private _storageSvc: BrowserStorageService
   ) {}
 
-  // PARA OBTENER STORAGE
-  // get(key: string) {
-  //   return this._storage.getItem(key);
-  // }
-
-  // PARA LOCALSTORAGE.SETITEM
-  // set(key: string, value: string) {
-  //   this._storage.setItem(key, value);
-  // }
-
   isLoggedIn(): boolean {
-    // const accessToken = localStorage.getItem('accessToken');
-    return localStorage.getItem('accessToken') ? true : false;
-    // return accessToken ? true : false;
-
-    // return this._storage.getItem('accessToken') ? true : false;
+    return this._storageSvc.get(localStorageLabels.accessToken) ? true : false;
   }
 
   setToken(token: any): void {
-    // return this._storage.setItem('accessToken', JSON.stringify(token));
-    return localStorage.setItem('accessToken', JSON.stringify(token));
+    return this._storageSvc.set(
+      localStorageLabels.accessToken,
+      JSON.stringify(token)
+    );
   }
 
   removeToken(): void {
-    // return this._storage.removeItem('accessToken');
-    return localStorage.removeItem('accessToken');
+    // return this._storage.removeItem(localStorageLabels.accessToken);
+    return this._storageSvc.remove(localStorageLabels.accessToken);
   }
 
   register({ email, password }: any): Promise<UserCredential> {

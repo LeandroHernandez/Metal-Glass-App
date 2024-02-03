@@ -1,13 +1,14 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
-import { IPhoto } from '../../../../../interfaces/photo.interface';
-import { NzCarouselModule } from 'ng-zorro-antd/carousel';
 import { ProductsService } from '../products.service';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzMessageModule, NzMessageService } from 'ng-zorro-antd/message';
+import { IPhoto } from '../../../../../interfaces/photo.interface';
 import { IProduct } from '../../../../../interfaces/product.interface';
-import { NzPopoverModule } from 'ng-zorro-antd/popover';
+import { localStorageLabels } from '../../../../constants/localStorageLabels';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzMessageModule, NzMessageService } from 'ng-zorro-antd/message';
+import { NzPopoverModule } from 'ng-zorro-antd/popover';
+import { NzAffixModule } from 'ng-zorro-antd/affix';
 
 @Component({
   selector: 'app-photos-view',
@@ -15,52 +16,64 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
   // imports: [NgFor, NzCarouselModule],
   imports: [
     NgIf,
+    NzGridModule,
     NzButtonModule,
     NzMessageModule,
     NzPopoverModule,
     NzGridModule,
+    NzAffixModule,
   ],
   template: `
     <!-- <p>photos-view works!</p> -->
     <div *ngIf="photo && product">
-      <img [src]="photo.url" [alt]="photo.name" [title]="photo.name" />
-      <button
-        type="button"
-        nz-button
-        nzType="primary"
-        nzDanger
-        nz-popover
-        nzPopoverTitle="¿Seguro de eliminar está imagen?"
-        [(nzPopoverVisible)]="visible"
-        nzPopoverTrigger="click"
-        [nzPopoverContent]="contentTemplate"
-      >
-        Eliminar imagen
-      </button>
-      <ng-template #contentTemplate>
-        <div nz-row nzAlign="middle" nzGutter="24" nzJustify="space-around">
-          <div nz-col>
-            <button
-              type="button"
-              nz-button
-              nzType="primary"
-              (click)="visible = false"
-            >
-              Mejor no
-            </button>
-          </div>
-          <div nz-col>
-            <button
-              type="button"
-              nz-button
-              nzType="primary"
-              nzDanger
-              (click)="deletePhoto(product, photo)"
-            >
-              Si
-            </button>
-          </div>
+      <div nz-row nzAlign="top" [nzGutter]="24" nzJustify="center">
+        <div nz-col>
+          <img [src]="photo.url" [alt]="photo.name" [title]="photo.name" />
         </div>
+      </div>
+      <div nz-row nzAlign="bottom" [nzGutter]="24" nzJustify="start">
+        <div nz-col [nzSpan]="22">
+          <button
+            type="button"
+            nz-button
+            nzType="primary"
+            nzDanger
+            nz-popover
+            nzPopoverTitle="¿Seguro de eliminar está imagen?"
+            [(nzPopoverVisible)]="visible"
+            nzPopoverTrigger="click"
+            [nzPopoverContent]="contentTemplate"
+          >
+            Eliminar imagen
+          </button>
+        </div>
+      </div>
+      <ng-template #contentTemplate>
+        <nz-affix [nzOffsetBottom]="10">
+          <div nz-row nzAlign="middle" nzGutter="24" nzJustify="space-around">
+            <div nz-col>
+              <button
+                type="button"
+                nz-button
+                nzType="primary"
+                (click)="visible = false"
+              >
+                Mejor no
+              </button>
+            </div>
+            <div nz-col>
+              <button
+                type="button"
+                nz-button
+                nzType="primary"
+                nzDanger
+                (click)="deletePhoto(product, photo)"
+              >
+                Si
+              </button>
+            </div>
+          </div>
+        </nz-affix>
       </ng-template>
     </div>
     <!-- <nz-carousel [nzDotPosition]="'bottom'">
@@ -92,7 +105,6 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
       img {
         max-width: 100%;
         margin-bottom: 24px;
-        // max-height: 100%;
       }
     `,
   ],
@@ -111,9 +123,12 @@ export class PhotosViewComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // this.photos = JSON.parse(localStorage.getItem('photos') ?? '[]');
-    this.product = JSON.parse(localStorage.getItem('product') ?? 'null');
-    this.photo = JSON.parse(localStorage.getItem('photo') ?? 'null');
+    this.product = JSON.parse(
+      this._productsSvc._storageSvc.get(localStorageLabels.product) ?? 'null'
+    );
+    this.photo = JSON.parse(
+      this._productsSvc._storageSvc.get(localStorageLabels.photo) ?? 'null'
+    );
   }
 
   deletePhoto(product: IProduct, photo: IPhoto): void {

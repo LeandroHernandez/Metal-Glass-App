@@ -10,4 +10,6 @@ export enum DbCollections {
   products = 'products',
   clients = 'clients',
   typesOfDocuments = 'types-of-documents',
+  productsToQuote = 'products-to-quote',
+  takenIntoAccount = 'taken-into-account',
 }

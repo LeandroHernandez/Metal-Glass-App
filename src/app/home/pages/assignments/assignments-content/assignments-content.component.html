@@ -35,66 +35,69 @@
           nzSm="23"
           nzXs="24"
         >
-          <!-- <nz-card> -->
-          <!-- {{ assignments | json }} -->
-          <nz-table
-            #nzTable
-            [nzData]="assignmentsView"
-            nzTableLayout="fixed"
-            [nzScroll]="{ x: '99%' }"
-            nzShowPagination
-            nzShowSizeChanger
+          <nz-spin
+            [nzTip]="'Cargando...'"
+            [nzSpinning]="spinning"
+            nzSize="large"
           >
-            <thead>
-              <tr>
-                <th nzWidth="220px">
-                  Descripción de lo asignado
+            <nz-table
+              #nzTable
+              [nzData]="assignmentsView"
+              nzTableLayout="fixed"
+              [nzScroll]="{ x: '99%' }"
+              nzShowPagination
+              nzShowSizeChanger
+            >
+              <thead>
+                <tr>
+                  <th nzWidth="220px">
+                    Descripción de lo asignado
 
-                  <form nz-form [formGroup]="filterForm">
-                    <!-- <input
+                    <form nz-form [formGroup]="filterForm">
+                      <!-- <input
                       type="text"
                       nz-input
                       formControlName="theAssigned"
                       placeholder="Lo asignado"
                       (ngModelChange)="search()"
                       /> -->
-                    <div nz-row nzAlign="middle" nzJustify="space-between">
-                      <div nz-col nzSpan="22">
-                        <nz-select
-                          nzMode="default"
-                          class="productFilter"
-                          nzShowSearch
-                          nzPlaceHolder="Descripción"
-                          formControlName="theAssigned"
-                          (ngModelChange)="search()"
-                        >
-                          <nz-option
-                            *ngFor="let theAssignment of theAssignments"
-                            [nzValue]="theAssignment"
-                            [nzLabel]="theAssignment"
-                          ></nz-option>
-                        </nz-select>
+                      <div nz-row nzAlign="middle" nzJustify="space-between">
+                        <div nz-col nzSpan="22">
+                          <nz-select
+                            nzMode="default"
+                            class="productFilter"
+                            nzShowSearch
+                            nzPlaceHolder="Descripción"
+                            formControlName="theAssigned"
+                            (ngModelChange)="search()"
+                          >
+                            <nz-option
+                              *ngFor="let theAssignment of theAssignments"
+                              [nzValue]="theAssignment"
+                              [nzLabel]="theAssignment"
+                            ></nz-option>
+                          </nz-select>
+                        </div>
+                        <div nz-col nzSpan="2">
+                          <button
+                            title="restear"
+                            type="button"
+                            nz-button
+                            nzType="primary"
+                            (click)="
+                              filterForm.reset(); assignmentsView = assignments
+                            "
+                          >
+                            <span nz-icon nzType="reload"></span>
+                          </button>
+                        </div>
                       </div>
-                      <div nz-col nzSpan="2">
-                        <button
-                          title="restear"
-                          type="button"
-                          nz-button
-                          nzType="primary"
-                          (click)="
-                            filterForm.reset(); assignmentsView = assignments
-                          "
-                        >
-                          <span nz-icon nzType="reload"></span>
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                </th>
-                <!-- <th>Quien lo asignó</th> -->
-                <th nzWidth="200px">
-                  Quienes lo asignaron
-                  <!-- <form nz-form [formGroup]="filterForm">
+                    </form>
+                  </th>
+                  <!-- <th>Quien lo asignó</th> -->
+                  <th nzWidth="200px">
+                    Quienes lo asignaron
+                    <!-- <form nz-form [formGroup]="filterForm">
                     <nz-select
                       nzMode="tags"
                       class="productFilter"
@@ -110,10 +113,10 @@
                       ></nz-option>
                     </nz-select>
                   </form> -->
-                </th>
-                <th nzWidth="200px">
-                  Responsables por lo asignado
-                  <!-- <form nz-form [formGroup]="filterForm">
+                  </th>
+                  <th nzWidth="200px">
+                    Responsables por lo asignado
+                    <!-- <form nz-form [formGroup]="filterForm">
                     <nz-select
                       nzMode="tags"
                       class="productFilter"
@@ -129,103 +132,122 @@
                       ></nz-option>
                     </nz-select>
                   </form> -->
-                </th>
-                <th nzWidth="200px" nzWidth="200px">
-                  <div nz-row [nzJustify]="'center'">
-                    Fecha de la asignación
-                  </div>
-                </th>
-                <th nzWidth="150px">
-                  <div nz-row [nzJustify]="'center'">Acciones</div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- <tr *ngFor="let assignment of assignments; let i = index"> -->
-              <tr *ngFor="let assignment of nzTable.data; let i = index">
-                <td>{{ assignment.theAssigned }}</td>
-                <td>
-                  <div *ngFor="let who of assignment.whoAssigns">
-                    -{{ who }}.
-                  </div>
-                </td>
-                <td>
-                  <div
-                    *ngFor="
-                      let responsible of assignment.responsibleForTheAssignment
-                    "
-                  >
-                    -{{ responsible }}.
-                  </div>
-                </td>
-                <td>
-                  <div nz-row [nzJustify]="'center'">
-                    <!-- {{ assignment.createdAt | date : "d/M/yy, h:mm a" }} -->
-                    {{ assignment.registerDate }}
-                  </div>
-                </td>
-                <!-- <td colSpan="1">{{ "assignment.acctions" }}</td> -->
-                <td colSpan="1">
-                  <!-- <a nz-button nzType="link">Text</a> -->
-                  <div nz-row nzJustify="space-evenly">
-                    <!-- <div nz-col>
-                      <button
-                        nz-button
-                        nzType="primary"
-                        nzShape="circle"
-                        title="Editar"
-                        type="button"
-                        (click)="showEditAssignment(assignment, i)"
-                      >
-                        <span nz-icon nzType="edit" title="Editar"></span>
-                      </button>
-                    </div> -->
-                    <div nz-col>
-                      <a
-                        nz-button
-                        nzType="link"
-                        nzDanger
-                        title="eliminar"
-                        (click)="assignmentPerDelete = assignment"
-                        ><span nz-icon nzType="delete" title="eliminar"></span
-                      ></a>
+                  </th>
+                  <th nzWidth="200px" nzWidth="200px">
+                    <div nz-row [nzJustify]="'center'">
+                      Fecha de la asignación
                     </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </nz-table>
-          <nz-dropdown-menu #theAssigned="nzDropdownMenu">
-            <div class="ant-table-filter-dropdown">
-              <div *ngIf="1 > 0; then search_box" class="search-box"></div>
-            </div>
-          </nz-dropdown-menu>
-          <nz-dropdown-menu #administratorWhoAssigns="nzDropdownMenu">
-            <div
-              style="
-                background: #ffffffff;
-                padding: 24px;
-                box-shadow: 0 0 10px 0 rgb(196, 196, 196);
-              "
-            >
-              <div style="border-bottom: 1px solid rgb(233, 233, 233)">
-                <label
-                  nz-checkbox
-                  [(ngModel)]="allChecked"
-                  (ngModelChange)="updateAllChecked()"
-                  [nzIndeterminate]="indeterminate"
-                >
-                  Seleccionar todos
-                </label>
+                  </th>
+                  <th nzWidth="150px">
+                    <div nz-row [nzJustify]="'center'">Acciones</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- <tr *ngFor="let assignment of assignments; let i = index"> -->
+                <tr *ngFor="let assignment of nzTable.data; let i = index">
+                  <td>{{ assignment.theAssigned }}</td>
+                  <td>
+                    <div *ngFor="let who of assignment.whoAssigns">
+                      -{{ who }}.
+                    </div>
+                  </td>
+                  <td>
+                    <div
+                      *ngFor="
+                        let responsible of assignment.responsibleForTheAssignment
+                      "
+                    >
+                      -{{ responsible }}.
+                    </div>
+                  </td>
+                  <td>
+                    <div nz-row [nzJustify]="'center'">
+                      <!-- {{ assignment.createdAt | date : "d/M/yy, h:mm a" }} -->
+                      {{ assignment.registerDate }}
+                    </div>
+                  </td>
+                  <!-- <td colSpan="1">{{ "assignment.acctions" }}</td> -->
+                  <td colSpan="1">
+                    <!-- <a nz-button nzType="link">Text</a> -->
+                    <div nz-row nzJustify="space-evenly">
+                      <div nz-col>
+                        <button
+                          nz-button
+                          nzType="primary"
+                          nzShape="circle"
+                          title="Editar"
+                          type="button"
+                          (click)="showEditAssignment(assignment)"
+                        >
+                          <span nz-icon nzType="edit" title="Editar"></span>
+                        </button>
+                      </div>
+                      <div nz-col>
+                        <a
+                          nz-button
+                          nzType="link"
+                          nzDanger
+                          title="eliminar"
+                          (click)="assignmentPerDelete = assignment"
+                          ><span nz-icon nzType="delete" title="eliminar"></span
+                        ></a>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </nz-table>
+            <nz-dropdown-menu #theAssigned="nzDropdownMenu">
+              <div class="ant-table-filter-dropdown">
+                <div *ngIf="1 > 0; then search_box" class="search-box"></div>
               </div>
-              <br />
-              <nz-checkbox-group
-                style="width: 250px; max-width: 90%"
-                [(ngModel)]="administratorsWhoAssignsListView"
-                (ngModelChange)="updateSingleChecked()"
-              ></nz-checkbox-group>
-              <br />
-              <br />
+            </nz-dropdown-menu>
+            <nz-dropdown-menu #administratorWhoAssigns="nzDropdownMenu">
+              <div
+                style="
+                  background: #ffffffff;
+                  padding: 24px;
+                  box-shadow: 0 0 10px 0 rgb(196, 196, 196);
+                "
+              >
+                <div style="border-bottom: 1px solid rgb(233, 233, 233)">
+                  <label
+                    nz-checkbox
+                    [(ngModel)]="allChecked"
+                    (ngModelChange)="updateAllChecked()"
+                    [nzIndeterminate]="indeterminate"
+                  >
+                    Seleccionar todos
+                  </label>
+                </div>
+                <br />
+                <nz-checkbox-group
+                  style="width: 250px; max-width: 90%"
+                  [(ngModel)]="administratorsWhoAssignsListView"
+                  (ngModelChange)="updateSingleChecked()"
+                ></nz-checkbox-group>
+                <br />
+                <br />
+                <button
+                  nz-button
+                  nzSize="small"
+                  nzType="primary"
+                  (click)="search()"
+                  class="search-button"
+                >
+                  Search
+                </button>
+                <!-- <button nz-button nzSize="small" (click)="reset()">Reset</button> -->
+              </div>
+            </nz-dropdown-menu>
+            <ng-template id="search_box" #search_box>
+              <input
+                type="text"
+                nz-input
+                placeholder="Search name"
+                [(ngModel)]="searchValue"
+              />
               <button
                 nz-button
                 nzSize="small"
@@ -235,28 +257,9 @@
               >
                 Search
               </button>
-              <!-- <button nz-button nzSize="small" (click)="reset()">Reset</button> -->
-            </div>
-          </nz-dropdown-menu>
-          <ng-template id="search_box" #search_box>
-            <input
-              type="text"
-              nz-input
-              placeholder="Search name"
-              [(ngModel)]="searchValue"
-            />
-            <button
-              nz-button
-              nzSize="small"
-              nzType="primary"
-              (click)="search()"
-              class="search-button"
-            >
-              Search
-            </button>
-            <button nz-button nzSize="small" (click)="reset()">Reset</button>
-          </ng-template>
-          <!-- </nz-card> -->
+              <button nz-button nzSize="small" (click)="reset()">Reset</button>
+            </ng-template>
+          </nz-spin>
         </div>
       </div>
     </div>
@@ -271,41 +274,44 @@
     class="deleteAlertRow"
   >
     <div nz-col [nzSpan]="22">
-      <nz-alert
-        nzShowIcon
-        nzType="warning"
-        nzMessage="¿Seguro?"
-        [nzDescription]="descriptionTemplate2"
-      ></nz-alert>
-      <ng-template #descriptionTemplate2>
-        <!-- <p>Info Description Info Description Info Description Info Description</p> -->
-        <p *ngIf="assignmentPerDelete">
-          ¿Seguro de eliminar la asignación
-          {{ assignmentPerDelete.theAssigned }} ?
-        </p>
-        <div nz-row nzAlign="middle" [nzGutter]="[24, 24]" nzJustify="end">
-          <div nz-col>
-            <button
-              nz-button
-              nzType="primary"
-              nzDanger
-              *ngIf="assignmentPerDelete"
-              (click)="assignmentDelete(assignmentPerDelete)"
-            >
-              Eliminar
-            </button>
+      <nz-affix [nzOffsetBottom]="10">
+        <nz-alert
+          nzShowIcon
+          nzType="warning"
+          nzMessage="¿Seguro?"
+          [nzDescription]="descriptionTemplate2"
+        ></nz-alert>
+        <ng-template #descriptionTemplate2>
+          <p *ngIf="assignmentPerDelete">
+            ¿Seguro de eliminar la asignación
+            {{ assignmentPerDelete.theAssigned }} ?
+          </p>
+          <div nz-row nzAlign="middle" [nzGutter]="[24, 24]" nzJustify="end">
+            <div nz-col>
+              <button
+                type="button"
+                nz-button
+                nzType="primary"
+                nzDanger
+                *ngIf="assignmentPerDelete"
+                (click)="assignmentDelete(assignmentPerDelete)"
+              >
+                Eliminar
+              </button>
+            </div>
+            <div nz-col>
+              <button
+                type="button"
+                nz-button
+                nzType="primary"
+                (click)="assignmentPerDelete = null"
+              >
+                Mejor no
+              </button>
+            </div>
           </div>
-          <div nz-col>
-            <button
-              nz-button
-              nzType="primary"
-              (click)="assignmentPerDelete = null"
-            >
-              Mejor no
-            </button>
-          </div>
-        </div>
-      </ng-template>
+        </ng-template>
+      </nz-affix>
     </div>
   </div>
 </div>

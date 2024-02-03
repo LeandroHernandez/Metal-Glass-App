@@ -1,54 +1,73 @@
 <!-- <p>clients-content works!</p> -->
-<nz-spin [nzSpinning]="spinning" [nzSize]="'large'" [nzTip]="'Cargando'">
-  <div *ngIf="clients">
-    <app-global-header [data]="globalHeaderData"></app-global-header>
-    <div
-      nz-row
-      nzAlign="middle"
-      [nzGutter]="[0, 20]"
-      nzJustify="center"
-      class="row-content"
-    >
-      <div nz-col nzSpan="24" class="col-content col-registerAssignment">
-        <div nz-row nzAlign="middle" [nzGutter]="[0, 0]" nzJustify="center">
-          <div nz-col nzSpan="23">
-            <button
-              nz-button
-              nzType="primary"
-              nzSize="large"
-              title="Back"
-              [routerLink]="['/home/clientes/registro-cliente']"
-              type="button"
-            >
-              Registrar un nuevo cliente
-            </button>
-          </div>
+<div *ngIf="clients">
+  <app-global-header [data]="globalHeaderData"></app-global-header>
+  <div
+    nz-row
+    nzAlign="middle"
+    [nzGutter]="[0, 20]"
+    nzJustify="center"
+    class="row-content"
+  >
+    <div nz-col nzSpan="24" class="col-content col-registerAssignment">
+      <div nz-row nzAlign="middle" [nzGutter]="[0, 0]" nzJustify="center">
+        <div nz-col nzSpan="23">
+          <button
+            nz-button
+            nzType="primary"
+            nzSize="large"
+            title="Back"
+            [routerLink]="['/home/clientes/registro-cliente']"
+            type="button"
+          >
+            Registrar un nuevo cliente
+          </button>
         </div>
       </div>
-      <div nz-col nzSpan="24" class="col-content">
-        <div nz-row nzAlign="middle" [nzGutter]="[0, 0]" nzJustify="center">
-          <div
-            nz-col
-            nzXXl="23"
-            nzXl="23"
-            nzLg="23"
-            nzMd="23"
-            nzSm="23"
-            nzXs="24"
+    </div>
+    <div nz-col nzSpan="24" class="col-content">
+      <div nz-row nzAlign="middle" [nzGutter]="[0, 0]" nzJustify="center">
+        <div
+          nz-col
+          nzXXl="23"
+          nzXl="23"
+          nzLg="23"
+          nzMd="23"
+          nzSm="23"
+          nzXs="24"
+        >
+          <nz-spin
+            [nzSpinning]="spinning"
+            [nzSize]="'large'"
+            [nzTip]="'Cargando'"
           >
-            <!-- [nzData]="clientsView" -->
             <nz-table
               #nzTable
-              [nzData]="tableData"
+              [nzData]="clientsView"
               nzTableLayout="fixed"
               [nzScroll]="{ x: '99%' }"
               nzShowPagination
               nzShowSizeChanger
+              nzNoResult=""
             >
               <thead>
                 <tr>
-                  <!-- <th nzWidth="250px" nzCustomFilter>Tipo de documento</th> -->
-                  <th nzWidth="250px" nzCustomFilter>
+                  @for (column of listOfColumns; track $index) {
+                  <th
+                    [nzWidth]="column.nzWidth ?? '250px'"
+                    [nzShowFilter]="column.name === 'Acciones' ? false : true"
+                    [nzFilterMultiple]="true"
+                    [nzFilters]="column.listOfFilter"
+                    [nzFilterFn]="column.filterFn"
+                  >
+                    {{ column.name }}
+                  </th>
+                  }
+                  <!-- <th
+                    nzWidth="250px"
+                    [nzFilterMultiple]="true"
+                    [nzFilters]="documentTypesFilter"
+                    [nzFilterFn]="documentTypesFilterFn"
+                  >
                     <div
                       nz-row
                       nzAlign="middle"
@@ -86,9 +105,7 @@
                           >
                             <nz-option
                               *ngFor="let documentType of documentTypes"
-                              [nzValue]="{
-                                type: documentType
-                              }"
+                              [nzValue]="documentType"
                               [nzLabel]="documentType"
                             ></nz-option>
                           </nz-select>
@@ -195,7 +212,6 @@
                       [formGroup]="findClientsFilterForm"
                       [ngClass]="{ formView: filtNamesCondition }"
                     >
-                      <!-- (ngModelChange)="filt('names', $event)" -->
                       <div nz-row nzAlign="middle" nzJustify="space-between">
                         <div nz-col nzSpan="21">
                           <nz-select
@@ -295,11 +311,11 @@
                   </th>
                   <th nzWidth="150px" nzCustomFilter>celular</th>
                   <th nzWidth="250px" nzCustomFilter>Correo</th>
-                  <th nzWidth="120px">Acciones</th>
+                  <th nzWidth="120px">Acciones</th> -->
                 </tr>
               </thead>
               <tbody>
-                <!-- <tr *ngFor="let client of tableData; let i = index"> -->
+                <!-- <tr *ngFor="let client of nzTable.data; let i = index"> -->
                 <tr *ngFor="let client of nzTable.data; let i = index">
                   <td>
                     <div *ngIf="client.documentType">
@@ -352,49 +368,51 @@
                 </tr>
               </tbody>
             </nz-table>
-          </div>
+          </nz-spin>
         </div>
       </div>
     </div>
   </div>
-  <div
-    nz-row
-    nzAlign="middle"
-    [nzGutter]="[24, 24]"
-    nzJustify="center"
-    *ngIf="clientPerDelete"
-  >
-    <div nz-col [nzSpan]="22">
+</div>
+<div
+  nz-row
+  nzAlign="middle"
+  [nzGutter]="[24, 24]"
+  nzJustify="center"
+  *ngIf="clientPerDelete"
+>
+  <div nz-col [nzSpan]="22">
+    <nz-affix [nzOffsetBottom]="10">
       <nz-alert
         nzShowIcon
         nzType="warning"
         nzMessage="¿Seguro?"
         [nzDescription]="descriptionTemplate2"
       ></nz-alert>
-      <ng-template #descriptionTemplate2>
-        <!-- <p>Info Description Info Description Info Description Info Description</p> -->
-        <p *ngIf="clientPerDelete">
-          Seguro de eliminar a {{ clientPerDelete.names }}
-        </p>
-        <div nz-row nzAlign="middle" [nzGutter]="[24, 24]" nzJustify="end">
-          <div nz-col>
-            <button
-              nz-button
-              nzType="primary"
-              nzDanger
-              *ngIf="clientPerDelete"
-              (click)="clientDelete(clientPerDelete)"
-            >
-              Eliminar
-            </button>
-          </div>
-          <div nz-col>
-            <button nz-button nzType="primary" (click)="clientPerDelete = null">
-              Mejor no
-            </button>
-          </div>
+    </nz-affix>
+    <ng-template #descriptionTemplate2>
+      <!-- <p>Info Description Info Description Info Description Info Description</p> -->
+      <p *ngIf="clientPerDelete">
+        Seguro de eliminar a {{ clientPerDelete.names }}
+      </p>
+      <div nz-row nzAlign="middle" [nzGutter]="[24, 24]" nzJustify="end">
+        <div nz-col>
+          <button
+            nz-button
+            nzType="primary"
+            nzDanger
+            *ngIf="clientPerDelete"
+            (click)="clientDelete(clientPerDelete)"
+          >
+            Eliminar
+          </button>
         </div>
-      </ng-template>
-    </div>
+        <div nz-col>
+          <button nz-button nzType="primary" (click)="clientPerDelete = null">
+            Mejor no
+          </button>
+        </div>
+      </div>
+    </ng-template>
   </div>
-</nz-spin>
+</div>

@@ -17,6 +17,9 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzAffixModule } from 'ng-zorro-antd/affix';
+import { localStorageLabels } from '../../../../../constants/localStorageLabels';
 
 @Component({
   selector: 'app-list-quotes',
@@ -40,6 +43,8 @@ import { NzAlertModule } from 'ng-zorro-antd/alert';
     NzButtonModule,
     NzIconModule,
     NzAlertModule,
+    NzSpinModule,
+    NzAffixModule,
   ],
   templateUrl: './list-quotes.component.html',
   styles: [
@@ -55,6 +60,7 @@ export class ListQuotesComponent implements OnInit {
   public clients: Array<IClient> = [];
 
   public nzPopoverVisible: boolean = false;
+  public spinning: boolean = false;
 
   public quotePerDelete: any | null = null;
   public quotePerDeletePositon: number | null = null;
@@ -79,11 +85,16 @@ export class ListQuotesComponent implements OnInit {
   }
 
   getQuotes(): void {
+    this.spinning = true;
     this._quoteSvc.getQuotes().subscribe(
       (quotesDB) => {
         this.quotes = quotesDB;
+        this.spinning = false;
       },
-      (err) => console.log({ err })
+      (err) => {
+        console.log({ err });
+        this.spinning = false;
+      }
     );
   }
 
@@ -113,9 +124,18 @@ export class ListQuotesComponent implements OnInit {
       // nzOnCancel: () => this.getProducts(),
       // nzOnOk: () => this.getProducts(),
     });
-    localStorage.setItem('productsPerQuote', JSON.stringify(productsPerQuote));
-    localStorage.setItem('formQuoteGeneral', JSON.stringify(formQuoteGeneral));
-    localStorage.setItem('registrationActionCondition', JSON.stringify(false));
+    this._quoteSvc._storageSvc.set(
+      localStorageLabels.productsPerQuote,
+      JSON.stringify(productsPerQuote)
+    );
+    this._quoteSvc._storageSvc.set(
+      localStorageLabels.formQuoteGeneral,
+      JSON.stringify(formQuoteGeneral)
+    );
+    this._quoteSvc._storageSvc.set(
+      localStorageLabels.registrationActionCondition,
+      JSON.stringify(false)
+    );
   }
 
   quoteEditAction(quote: any): void {
@@ -129,8 +149,14 @@ export class ListQuotesComponent implements OnInit {
       nzOnCancel: () => this.getQuotes(),
       nzOnOk: () => this.getQuotes(),
     });
-    localStorage.setItem('quote', JSON.stringify(quote));
-    localStorage.setItem('editActionCondition', JSON.stringify(true));
+    this._quoteSvc._storageSvc.set(
+      localStorageLabels.quote,
+      JSON.stringify(quote)
+    );
+    this._quoteSvc._storageSvc.set(
+      localStorageLabels.editActionCondition,
+      JSON.stringify(true)
+    );
   }
 
   quoteDeleteAction(quote: any): void {
@@ -169,25 +195,6 @@ export class ListQuotesComponent implements OnInit {
         })
         .catch((error) => console.log({ error }));
     }
-    // .subscribe(
-    //   (res) => {
-    //     localStorage.setItem('spinning', 'false');
-    //     res.length > 0
-    //       ? (this.quotes = res)
-    //       : (this.getQuotes(),
-    //         this._message.info(
-    //           'No se encontraron resultados en la busqueda'
-    //         ));
-    //   },
-    //   (error) => {
-    //     localStorage.setItem('spinning', 'false');
-    //     console.log({ error });
-    //     this._message.error(
-    //       'Hubo un error interno por lo que no se pudo realizar la busqueda'
-    //     );
-    //     this.getQuotes();
-    //   }
-    // );
   }
 
   removeNullProperties(obj: any) {

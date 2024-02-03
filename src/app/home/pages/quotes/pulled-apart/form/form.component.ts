@@ -12,6 +12,7 @@ import { FormService } from './form.service';
 import { QuotesService } from '../../quotes.service';
 import { RoutesApp } from '../../../../../constants';
 import { IPulledApartData } from '../../../../../../interfaces/pulled-apart-data.interface';
+import { localStorageLabels } from '../../../../../constants/localStorageLabels';
 
 @Component({
   selector: 'app-form',
@@ -118,7 +119,9 @@ export class FormComponent implements OnInit {
         }
       }
     } else {
-      const dataForm = localStorage.getItem('dataForm');
+      const dataForm = this._quotesSvc._storageSvc.get(
+        localStorageLabels.dataForm
+      );
       if (dataForm) {
         const dataFormParse: IDataForm = JSON.parse(dataForm);
         this.dataForm = dataFormParse;
@@ -142,7 +145,9 @@ export class FormComponent implements OnInit {
         this._formSvc
           .registerAcrylic(dto)
           .then((acrylic) => {
-            const pulledApartData = localStorage.getItem('pulledApartData');
+            const pulledApartData = this._quotesSvc._storageSvc.get(
+              localStorageLabels.pulledApartData
+            );
             if (pulledApartData) {
               const pulledApartDataParse: IPulledApartData =
                 JSON.parse(pulledApartData);
@@ -150,7 +155,10 @@ export class FormComponent implements OnInit {
                 (acrylics) => {
                   let post = pulledApartDataParse;
                   post.pulledAparts = acrylics;
-                  localStorage.setItem('pulledApartData', JSON.stringify(post));
+                  this._quotesSvc._storageSvc.set(
+                    localStorageLabels.pulledApartData,
+                    JSON.stringify(post)
+                  );
                   this._router.navigate([
                     `${RoutesApp.home}/${RoutesApp.acrylics}`,
                   ]);
@@ -169,7 +177,9 @@ export class FormComponent implements OnInit {
         this._formSvc
           .registerGlass(dto)
           .then((glass) => {
-            const pulledApartData = localStorage.getItem('pulledApartData');
+            const pulledApartData = this._quotesSvc._storageSvc.get(
+              localStorageLabels.pulledApartData
+            );
             if (pulledApartData) {
               const pulledApartDataParse: IPulledApartData =
                 JSON.parse(pulledApartData);
@@ -177,7 +187,10 @@ export class FormComponent implements OnInit {
                 (glasses) => {
                   let post = pulledApartDataParse;
                   post.pulledAparts = glasses;
-                  localStorage.setItem('pulledApartData', JSON.stringify(post));
+                  this._quotesSvc._storageSvc.set(
+                    localStorageLabels.pulledApartData,
+                    JSON.stringify(post)
+                  );
                   this._router.navigate([
                     `${RoutesApp.home}/${RoutesApp.glasses}`,
                   ]);
@@ -199,7 +212,9 @@ export class FormComponent implements OnInit {
         this._formSvc
           .registerProfile(dto)
           .then((profile) => {
-            const pulledApartData = localStorage.getItem('pulledApartData');
+            const pulledApartData = this._quotesSvc._storageSvc.get(
+              localStorageLabels.pulledApartData
+            );
             if (pulledApartData) {
               const pulledApartDataParse: IPulledApartData =
                 JSON.parse(pulledApartData);
@@ -207,7 +222,10 @@ export class FormComponent implements OnInit {
                 (profiles) => {
                   let post = pulledApartDataParse;
                   post.pulledAparts = profiles;
-                  localStorage.setItem('pulledApartData', JSON.stringify(post));
+                  this._quotesSvc._storageSvc.set(
+                    localStorageLabels.pulledApartData,
+                    JSON.stringify(post)
+                  );
                   this._router.navigate([
                     `${RoutesApp.home}/${RoutesApp.profiles}`,
                   ]);
@@ -229,7 +247,9 @@ export class FormComponent implements OnInit {
         this._formSvc
           .registerAccessory(dto)
           .then((accessory) => {
-            const pulledApartData = localStorage.getItem('pulledApartData');
+            const pulledApartData = this._quotesSvc._storageSvc.get(
+              localStorageLabels.pulledApartData
+            );
             if (pulledApartData) {
               const pulledApartDataParse: IPulledApartData =
                 JSON.parse(pulledApartData);
@@ -237,7 +257,10 @@ export class FormComponent implements OnInit {
                 (accessories) => {
                   let post = pulledApartDataParse;
                   post.pulledAparts = accessories;
-                  localStorage.setItem('pulledApartData', JSON.stringify(post));
+                  this._quotesSvc._storageSvc.set(
+                    localStorageLabels.pulledApartData,
+                    JSON.stringify(post)
+                  );
                   this._router.navigate([
                     `${RoutesApp.home}/${RoutesApp.accessories}`,
                   ]);
@@ -312,6 +335,6 @@ export class FormComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    localStorage.removeItem('dataForm');
+    this._quotesSvc._storageSvc.remove(localStorageLabels.dataForm);
   }
 }

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { JsonPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
   FormBuilder,
@@ -14,7 +14,10 @@ import { GlobalHeaderComponent } from '../../../global-header/global-header.comp
 import { ClientsService } from '../clients.service';
 
 import { IGlobalHeaderData } from '../../../../../interfaces/global-header-data.interface';
-import { IClient } from '../../../../../interfaces/client.interface';
+import {
+  ICLientColumnItem,
+  IClient,
+} from '../../../../../interfaces/client.interface';
 
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
@@ -26,6 +29,10 @@ import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzAffixModule } from 'ng-zorro-antd/affix';
+import { localStorageLabels } from '../../../../constants/localStorageLabels';
+import { TypesOfDocumentsService } from '../../types-of-documents/types-of-documents.service';
+import { ITypeDocument } from '../../../../../interfaces/type-document.interface';
 
 @Component({
   selector: 'app-clients-content',
@@ -33,6 +40,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
   imports: [
     NgIf,
     NgFor,
+    JsonPipe,
     NgClass,
     RouterLink,
     ReactiveFormsModule,
@@ -46,6 +54,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
     NzButtonModule,
     NzIconModule,
     NzSpinModule,
+    NzAffixModule,
   ],
   templateUrl: './clients-content.component.html',
   styleUrl: './clients-content.component.css',
@@ -61,7 +70,11 @@ export class ClientsContentComponent {
   public visible = false;
   public allChecked = false;
   public indeterminate = true;
-  public documentTypes: Array<string> = [];
+  // public documentTypes: Array<string> = [];
+  public documentTypes: Array<ITypeDocument> = [];
+
+  public listOfColumns: ICLientColumnItem[] = [];
+
   public documentNumbers: Array<string> = [];
   public names: Array<string> = [];
   public surnames: Array<string> = [];
@@ -104,66 +117,129 @@ export class ClientsContentComponent {
   constructor(
     private _fb: FormBuilder,
     private _clientsSvc: ClientsService,
+    private _typesOfDocumentsService: TypesOfDocumentsService,
     private _message: NzMessageService,
     private _modalSvc: NzModalService
   ) {
-    localStorage.setItem('spinning', 'true');
+    this._clientsSvc._storageSvc.set(localStorageLabels.spinning, 'true');
   }
 
   ngOnInit(): void {
-    this.spinning = true;
+    this.getTypesOfDocuments();
     this.getClients();
-    this.spinning = false;
-    const clients = this._clientsSvc.filter('Johan Leandro');
-    localStorage.removeItem('client');
+    this._clientsSvc._storageSvc.remove(localStorageLabels.client);
   }
 
   getClients(): void {
+    this.spinning = true;
     this._clientsSvc.getClients().subscribe(
       (clients) => {
+        this.documentTypes;
         this.clients = clients;
         this.clientsView = this.clients;
         this.initValueFilters(clients);
+        this.spinning = false;
       },
       (err) => {
         console.log({ error: err });
+        this.spinning = false;
+      }
+    );
+  }
+
+  getTypesOfDocuments(): void {
+    this.spinning = true;
+    this._typesOfDocumentsService.getDocumentTypes().subscribe(
+      (documentTypes) => {
+        this.documentTypes = documentTypes;
+        this.spinning = false;
+      },
+      (err) => {
+        console.log({ error: err });
+        this.spinning = false;
       }
     );
   }
 
   initValueFilters(clients: Array<IClient>): void {
-    clients.forEach((client) => {
-      if (
-        client.documentType &&
-        !this.documentTypes.includes(client.documentType.type)
-      ) {
-        this.documentTypes.push(client.documentType.type);
-      }
-      this.documentNumbers.push(client.documentNumber);
-      this.names.push(client.names);
-      this.surnames.push(client.surnames);
-    });
+    this.listOfColumns = [
+      {
+        name: 'Tipo de documento',
+        listOfFilter: this.documentTypes.map(function (documentType) {
+          return { text: documentType.type, value: documentType.type };
+        }),
+        filterFn: (list: string[], item: IClient) =>
+          list.some(
+            (documentType) => item.documentType.indexOf(documentType) !== -1
+          ),
+      },
+      {
+        name: 'Numero de documento',
+        listOfFilter: clients.map(function (client) {
+          return {
+            text: client.documentNumber,
+            value: client.documentNumber,
+          };
+        }),
+        filterFn: (list: string[], item: IClient) =>
+          list.some(
+            (documentNumber) =>
+              item.documentNumber.indexOf(documentNumber) !== -1
+          ),
+      },
+      {
+        name: 'Nombres',
+        listOfFilter: clients.map(function (client) {
+          return { text: client.names, value: client.names };
+        }),
+        filterFn: (list: string[], item: IClient) =>
+          list.some((names) => item.names.indexOf(names) !== -1),
+      },
+      {
+        name: 'Apellidos',
+        listOfFilter: clients.map(function (client) {
+          return { text: client.surnames, value: client.surnames };
+        }),
+        filterFn: (list: string[], item: IClient) =>
+          list.some((surnames) => item.surnames.indexOf(surnames) !== -1),
+      },
+      {
+        name: 'Numero de celular',
+        listOfFilter: clients.map(function (client) {
+          return { text: client.phoneNumber, value: client.phoneNumber };
+        }),
+        filterFn: (list: string[], item: IClient) =>
+          list.some(
+            (phoneNumber) => item.phoneNumber.indexOf(phoneNumber) !== -1
+          ),
+      },
+      {
+        name: 'Correo',
+        listOfFilter: clients.map(function (client) {
+          return { text: client.email, value: client.email };
+        }),
+        filterFn: (list: string[], item: IClient) =>
+          list.some((email) => item.email.indexOf(email) !== -1),
+      },
+      {
+        name: 'Acciones',
+        nzWidth: '120px',
+        listOfFilter: [],
+        filterFn: null,
+      },
+    ];
   }
 
   documentTypeFilt(): void {
     this.formControlDocumentNumber.setValue([]);
     this.formControlNames.setValue([]);
     this.formControlSurnames.setValue([]);
-    this.clientsView = [];
-    this.formControlDocumentType.value.length > 0
-      ? this.clients.forEach((client) => {
-          this.formControlDocumentType.value.forEach(
-            (documentTypeItem: { type: string }) => {
-              if (
-                client.documentType &&
-                client.documentType.type === documentTypeItem.type
-              ) {
-                this.clientsView.push(client);
-              }
-            }
-          );
-        })
-      : (this.clientsView = this.clients);
+    const clients = this._clientsSvc.filter(
+      'documentType',
+      this.formControlDocumentType.value
+    );
+    console.log({ clients });
+    this.clientsView = clients;
   }
 
   documentNumberFilt(): void {
@@ -225,60 +301,43 @@ export class ClientsContentComponent {
   }
 
   showEditModal(client: IClient, i: number): void {
-    // const clientRegisterComponent = this._modalSvc.info({
     this._modalSvc.info({
       nzTitle: 'Editar Cliente',
       nzContent: ClientRegisterComponent,
-      // nzComponentParams: { client },
       nzWidth: '90%',
       nzIconType: 'edit',
       nzOnOk: () => this.getClients(),
       nzOnCancel: () => this.getClients(),
     });
-    localStorage.setItem('client', JSON.stringify(client));
-    // clientRegisterComponent.componentInstance?.clientEmitter.subscribe(
-    //   (next) => {
-    //     this.clients.splice(i, 1, next);
-    //     this.clientsView.splice(i, 1, next);
-    //   }
-    // );
+    this._clientsSvc._storageSvc.set(
+      localStorageLabels.client,
+      JSON.stringify(client)
+    );
   }
 
-  // clientDelete(clientId: string): void {
   clientDelete(client: IClient): void {
-    localStorage.setItem('spinning', 'true');
+    this._clientsSvc._storageSvc.set(localStorageLabels.spinning, 'true');
     if (client.id) {
       this._clientsSvc
         .deleteClient(client.id)
         .then((res) => {
           this.getClients();
           this.clientPerDelete = null;
-          localStorage.setItem('spinning', 'false');
+          this._clientsSvc._storageSvc.set(
+            localStorageLabels.spinning,
+            'false'
+          );
           this._message.success('El cliente fue eliminado correctamente');
         })
         .catch((error) => {
-          localStorage.setItem('spinning', 'false');
+          this._clientsSvc._storageSvc.set(
+            localStorageLabels.spinning,
+            'false'
+          );
           this._message.error(
             'Hubo un problema interno y no fue posible eliminar el cliente, por favor vuelva a intentarlo'
           );
         });
-      // this._clientsSvc
-      //   // .deleteClient(clientId)
-      //   .deleteClient(client.id)
-      //   .subscribe(
-      //     (clientPostDeleteResponse) => {
-      //       this.getClients();
-      //       this.clientPerDelete = null;
-      //       localStorage.setItem('spinning', 'false');
-      //       this._message.success('El cliente fue eliminado correctamente');
-      //     },
-      //     (error) => {
-      //       localStorage.setItem('spinning', 'false');
-      //       this._message.error(
-      //         'Hubo un problema interno y no fue posible eliminar el cliente, por favor vuelva a intentarlo'
-      //       );
-      //     }
-      //   );
     }
   }
 }

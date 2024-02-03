@@ -1,3 +1,5 @@
+import { NzTableFilterFn, NzTableFilterList } from 'ng-zorro-antd/table';
+import { IColumnItem } from './nz-column-table.interface';
 import { ITypeDocument } from './type-document.interface';
 
 export interface IClient {
@@ -6,8 +8,8 @@ export interface IClient {
   documentNumber: string;
   names: string;
   surnames: string;
-  phoneNumber?: string;
-  email?: string;
+  phoneNumber: string;
+  email: string;
   // shoppingHistory?: IPurchase[];
   // datingHistory?: IAppointment[];
   shoppingHistory?: any[];
@@ -17,4 +19,11 @@ export interface IClient {
   Contact?: string;
   Address?: string;
   City?: string;
+}
+
+export interface ICLientColumnItem {
+  name: string;
+  nzWidth?: string;
+  listOfFilter: NzTableFilterList;
+  filterFn: NzTableFilterFn<IClient> | null;
 }

@@ -28,6 +28,7 @@ import { TypesOfDocumentsService } from '../../types-of-documents/types-of-docum
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { error } from 'console';
+import { localStorageLabels } from '../../../../constants/localStorageLabels';
 
 @Component({
   selector: 'app-client-register',
@@ -125,7 +126,7 @@ export class ClientRegisterComponent implements OnDestroy {
   ngOnInit(): void {
     this.spinning = true;
     this.getDocumentTypes();
-    const client = localStorage.getItem('client');
+    const client = this._clientsSvc._storageSvc.get(localStorageLabels.client);
     client ? (this.client = JSON.parse(client ?? '')) : (this.client = null);
     if (this.client) {
       this.setValueForm(this.client);
@@ -150,7 +151,7 @@ export class ClientRegisterComponent implements OnDestroy {
 
   registerClient(): void {
     if (this.registerClientForm.valid) {
-      localStorage.setItem('spinning', 'true');
+      this._clientsSvc._storageSvc.set(localStorageLabels.spinning, 'true');
       this._clientsSvc
         .registerClient({
           ...this.registerClientForm.value,
@@ -158,13 +159,19 @@ export class ClientRegisterComponent implements OnDestroy {
           phoneNumber: this.registerClientForm.value.phoneNumber,
         })
         .then((client) => {
-          localStorage.setItem('spinning', 'false');
+          this._clientsSvc._storageSvc.set(
+            localStorageLabels.spinning,
+            'false'
+          );
           this._message.success('El cliente fue registrado correctamente');
           this.registerClientForm.reset();
         })
         .catch((err) => {
           console.log({ error: err });
-          localStorage.setItem('spinning', 'false');
+          this._clientsSvc._storageSvc.set(
+            localStorageLabels.spinning,
+            'false'
+          );
           this._message.error(
             'Hubo un error interno registrando el cliente, por favor vuelva a intentarlo'
           );
@@ -206,38 +213,10 @@ export class ClientRegisterComponent implements OnDestroy {
           );
         });
       this.spinning = false;
-      // localStorage.setItem('spinning', 'true');
-      // this.client ? (this.spinning = true) : false;
-      // this._clientsSvc
-      //   .editClient(this.client._id, {
-      //     ...this.registerClientForm.value,
-      //     documentNumber: JSON.stringify(
-      //       this.registerClientForm.value.documentNumber
-      //     ),
-      //     phoneNumber: JSON.stringify(
-      //       this.registerClientForm.value.phoneNumber
-      //     ),
-      //   })
-      //   .subscribe(
-      //     (client) => {
-      //       localStorage.setItem('spinning', 'false');
-      //       this.client ? (this.spinning = false) : false;
-      //       this._message.success('Cliente editado exitosamente');
-      //       this.clientEmitter.emit(client);
-      //     },
-      //     (err) => {
-      //       // console.log({ error: err });
-      //       localStorage.setItem('spinning', 'false');
-      //       this.client ? (this.spinning = false) : false;
-      //       this._message.error(
-      //         'Hubo problema interno y no fue posible editar el cliente, por favor vuelva a intentarlo'
-      //       );
-      //     }
-      //   );
     }
   }
 
   ngOnDestroy(): void {
-    localStorage.removeItem('client');
+    this._clientsSvc._storageSvc.remove(localStorageLabels.client);
   }
 }

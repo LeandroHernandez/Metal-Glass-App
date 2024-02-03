@@ -21,6 +21,7 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NZ_MODAL_DATA } from 'ng-zorro-antd/modal';
+import { localStorageLabels } from '../../../../constants/localStorageLabels';
 
 @Component({
   selector: 'app-register-document-type',
@@ -175,7 +176,9 @@ export class RegisterDocumentTypeComponent implements OnInit {
     //   this.documentType ? this.initForm(this.documentType) : false;
     //   this.spinning = false;
     // }, 1000);
-    const documentType = localStorage.getItem('documentType');
+    const documentType = this._typesDocumentsSvc._storageSvc.get(
+      localStorageLabels.documentType
+    );
     documentType
       ? (this.documentType = JSON.parse(documentType))
       : (this.documentType = null);

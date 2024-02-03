@@ -36,6 +36,7 @@ import {
 } from 'firebase/storage';
 import { getDownloadURL } from '@angular/fire/storage';
 import { IPhoto } from '../../../../interfaces/photo.interface';
+import { BrowserStorageService } from '../../../browser-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -51,7 +52,10 @@ export class ProductsService {
 
   private _db = getFirestore();
 
-  constructor(private _fireStore: Firestore) {}
+  constructor(
+    private _fireStore: Firestore,
+    public _storageSvc: BrowserStorageService
+  ) {}
 
   registerProduct(
     productDTO: any
